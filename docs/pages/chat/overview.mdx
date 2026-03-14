@@ -1,0 +1,66 @@
+# Conversational Q&A
+
+The right panel hosts an AI research assistant that can answer questions about the paper, run simulations, and generate figures — all through natural conversation.
+
+## ChatKit Integration
+
+The chat interface is built on [OpenAI ChatKit](https://github.com/openai/chatkit), which provides:
+
+- Thread-based conversation management
+- Streaming response rendering
+- Markdown and code block formatting
+- A composable React component library
+
+The frontend uses `@openai/chatkit-react` and the backend implements a `ChatKitServer` that routes messages to the paper agent.
+
+## Start Screen
+
+When you first open Paper Chat, the assistant greets you with:
+
+> "Ask me anything about the paper."
+
+Below the greeting, five suggested prompts help you get started:
+
+- Summarize the paper's key contributions
+- Explain the three aggregation mechanisms
+- Show the main results table
+- Run a simulation with custom parameters
+- Generate a calibration figure
+
+## Contextual Suggested Prompts
+
+As you scroll through different sections of the paper, the suggested prompts below the chat update to match. Each section has 3–4 curated prompts:
+
+| Section | Example Prompts |
+|---------|----------------|
+| Introduction | "What cultural breakout markets is the paper targeting?" |
+| Model & Methods | "Explain the reputation update rule step by step" |
+| Results | "Compare Regime B results across all three mechanisms" |
+| Discussion | "What does the multiplicative limitation mean in practice?" |
+| References | "What are the key prediction markets papers cited?" |
+
+Prompts are defined in `contextual-prompts.ts` and retrieved via `getPromptsForSection(slug)`. If the current section doesn't have specific prompts, it falls back to the Introduction set.
+
+## Theme
+
+The chat panel uses a custom ChatKit theme matching the app's design:
+
+| Property | Value |
+|----------|-------|
+| Color scheme | Light |
+| Accent color | `#2d7a7a` (teal) |
+| Font | DM Sans |
+| Font size | 15px |
+| Border radius | Soft |
+| Density | Normal |
+
+## Message Flow
+
+1. User types or selects a suggested prompt
+2. ChatKit sends a POST to `/chatkit`
+3. The backend `PaperChatKitServer.respond()` runs the agent
+4. The agent calls tools as needed (search, simulate, generate figures)
+5. Responses stream back as ChatKit events
+6. Any generated figures are injected at the end of the response
+
+The agent is allowed up to 25 turns per request, meaning it can chain multiple tool calls to answer complex questions.

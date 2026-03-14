@@ -1,0 +1,63 @@
+# Reading Views
+
+Paper Chat offers two ways to read the paper: a rendered **Markdown view** with full LaTeX math support, and the **original PDF**.
+
+## View Toggle
+
+A two-button toggle in the paper panel header switches between modes. The active mode is highlighted with the teal accent color.
+
+```
+┌──────────────┬──────────────┐
+│ Reading View │     PDF      │
+└──────────────┴──────────────┘
+```
+
+The view mode is stored in the `PaperReaderContext` and persists as you navigate between sections.
+
+## Markdown View
+
+The default reading experience renders each section through `react-markdown` with:
+
+- **remarkMath** + **rehypeKatex** — inline and display LaTeX equations render natively
+- **remarkGfm** — GitHub-Flavored Markdown for tables, strikethrough, and task lists
+- Auto-slugified heading IDs for deep linking (e.g., `#reputation-update-rule`)
+- Lazy-loaded figures with captions extracted from `alt` text
+- Responsive table wrappers that scroll horizontally on small screens
+
+### Typography
+
+The Markdown view uses the paper's design system:
+
+| Role | Font |
+|------|------|
+| Headings | IBM Plex Sans |
+| Body text | Newsreader (serif) |
+| UI elements | DM Sans |
+| Code | SF Mono |
+
+### Skeleton Loading
+
+While the paper content loads from `/api/paper/full`, animated skeleton blocks show the page structure — title, paragraphs, and figures — so the layout doesn't jump when content arrives.
+
+## PDF View
+
+Toggle to PDF mode to see the original formatted paper. The PDF viewer uses `react-pdf` and renders:
+
+- All pages at 700px width with text and annotation layers
+- Page numbers below each page
+- Full scroll through the entire document
+- Loading and error states
+
+The PDF is served from `/api/paper/pdf` on the backend.
+
+## When to Use Each View
+
+| | Markdown | PDF |
+|---|----------|-----|
+| **Math rendering** | Inline KaTeX | Embedded in PDF |
+| **Text selection** | Yes — triggers tooltip | Limited (PDF text layer) |
+| **Section tracking** | Yes — updates TOC, header, prompts | No |
+| **Navigation** | TOC + smooth scroll | Page-by-page scroll |
+| **Figures** | Loaded from server | Embedded in PDF |
+
+The Markdown view is recommended for interactive use since it integrates with the TOC, selection tooltip, and contextual prompts.

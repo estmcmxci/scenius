@@ -1,0 +1,83 @@
+# Figure Generation
+
+The assistant can generate four types of publication-quality figures on demand. Each figure runs a simulation with your specified parameters and renders the results with matplotlib.
+
+## Figure Types
+
+### Calibration Curve
+
+**Command:** `generate_figure(figure_type="calibration")`
+
+Plots predicted probability vs observed frequency for all three mechanisms (E, C, R). A perfectly calibrated forecaster would lie on the diagonal.
+
+- X-axis: Predicted probability (binned)
+- Y-axis: Observed frequency
+- Three lines: Equal (green), Capital (red), Reputation (blue)
+- Diagonal reference line for perfect calibration
+
+This is the primary visualization for comparing mechanism accuracy.
+
+### Reputation Separation
+
+**Command:** `generate_figure(figure_type="reputation_separation")`
+
+Boxplot showing the final reputation distributions for good vs bad agents.
+
+- Two boxes: "Good agents" and "Bad agents"
+- Y-axis: Final reputation value
+- Shows median, quartiles, and outliers
+
+A clear separation between the boxes indicates the reputation system is successfully distinguishing skilled from unskilled forecasters.
+
+### Learning Dynamics
+
+**Command:** `generate_figure(figure_type="learning_dynamics")`
+
+Rolling Brier score (window = 100 questions) plotted over all J questions.
+
+- X-axis: Question number
+- Y-axis: Rolling mean Brier score
+- Three lines: E, C, R
+- Shows how each mechanism's accuracy evolves as reputations converge
+
+Early in the simulation, all three mechanisms perform similarly. As reputations separate, R should diverge from C (especially in Regime B).
+
+### Inequality Sensitivity
+
+**Command:** `generate_figure(figure_type="inequality_sensitivity")`
+
+Two-panel scatter plot showing how stake dispersion (σ_s) affects outcomes:
+
+- **Panel (a):** R vs C improvement (%) as a function of σ_s
+- **Panel (b):** C vs E distortion (%) as a function of σ_s
+
+Uses pre-computed sweep data across multiple σ_s values with error bars from multi-seed runs. This figure does not require regime or alpha parameters since it aggregates across the full sweep.
+
+## Color Scheme
+
+All figures use a consistent color scheme:
+
+| Mechanism | Color | Marker |
+|-----------|-------|--------|
+| Equal (E) | Green (`#2ca02c`) | Diamond |
+| Capital (C) | Red (`#d62728`) | Circle |
+| Reputation (R) | Blue (`#1f77b4`) | Square |
+
+## How Figures Are Delivered
+
+1. The agent calls `generate_figure` with the desired type and parameters
+2. The backend runs a single-seed simulation (or loads sweep data for inequality sensitivity)
+3. Matplotlib renders the figure and saves it as a PNG
+4. The image is encoded as a base64 data URI and added to `pending_images`
+5. After the agent finishes responding, the image is injected into the chat stream
+6. The PNG is also saved to `data/figures/` with a UUID filename for static serving
+
+## Customization
+
+You can control figure parameters through natural language:
+
+- *"Generate a calibration figure for Regime B with α = 1.5"*
+- *"Show reputation separation with σ_bad = 2.0"*
+- *"Plot learning dynamics for the correlated regime"*
+
+The agent maps your request to the appropriate `generate_figure` call with the right parameter values.

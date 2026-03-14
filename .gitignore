@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Env
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Vercel
+.vercel
+
+# Supabase
+.supabase/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.aux
+*.out
+*.blg
+*.bbl
+*.toc
+
+# LaTeX
+*.pdf
+!research/scenius_simulation.pdf
+!docs/Reputation-weighted markets (Scenius).pdf
+!scenius-paper/paper.pdf
+!latex_text/*.pdf
+
+# Playwright
+.playwright-mcp/
+
+# IDE
+.vscode/
+.idea/
+
+# Claude / MCP
+.claude/settings.local.json

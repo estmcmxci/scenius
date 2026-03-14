@@ -1,0 +1,124 @@
+# Agent Tools
+
+The paper assistant has 8 specialized tools that let it go beyond text retrieval — searching, computing, simulating, and visualizing on demand.
+
+## Paper Tools
+
+### `search_paper`
+
+Full-text search across the paper using TF-IDF ranking.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `query` | `str` | — | Search query |
+| `top_k` | `int` | `3` | Max results to return (capped at 5) |
+
+Returns ranked passages with relevance scores. Only results scoring above 0.01 are included. The paper is pre-indexed into paragraph-level chunks (minimum 50 characters each) using scikit-learn's `TfidfVectorizer` with 5,000 max features and English stop words removed.
+
+### `get_section`
+
+Retrieves the full content of a paper section by name.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `section` | `str` | Section name (case-insensitive, fuzzy-matched) |
+
+Returns up to 3,000 characters of the matched section. Supports flexible input — "results", "Results", or "RESULTS" all match.
+
+### `get_references`
+
+Searches the paper's BibTeX bibliography.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `query` | `str` | Search term to match against reference entries |
+
+Returns up to 10 matching BibTeX entries. Useful for finding specific citations, author names, or publication details.
+
+## Simulation Tools
+
+### `query_results`
+
+Looks up pre-computed simulation results from the main results table (630 runs).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `regime` | `str` | — | `"A"` (uncorrelated), `"B"` (anti-correlated), or `"C"` (correlated) |
+| `metric` | `str` | `"Brier"` | Metric to query |
+
+Returns: R vs C improvement (%), confidence interval, p-value, C vs E delta (%), reputation separation ratio, number of questions, and seed count.
+
+### `compare_mechanisms`
+
+Returns per-seed breakdown or inequality sweep data for a regime.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `regime` | `str` | — | Regime identifier |
+| `sigma_s` | `float` | `1.0` | Stake dispersion parameter |
+
+Returns a table of 10 seeds showing Brier scores for equal-weighted (E), capital-weighted (C), and reputation-weighted (R) mechanisms, plus R vs C improvement per seed.
+
+### `get_parameters`
+
+Returns the default simulation parameter table — no arguments needed.
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| N | 50 | Number of agents |
+| J | 5,000 | Questions per campaign |
+| α | 1.7 | Pareto tail index |
+| β | 1.0 | Wealth scale |
+| σ_good | 0.6 | Good agent noise |
+| σ_bad | 1.6 | Bad agent noise |
+| f_good | 0.2 | Fraction of good agents |
+| σ_s | 1.0 | Stake dispersion |
+| r₀ | 1.0 | Initial reputation |
+| λ | 0.05 | Learning rate |
+| k | 5.0 | Penalty steepness |
+
+### `run_custom_simulation`
+
+Runs a live Monte Carlo simulation with custom parameters.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `alpha` | `float` | — | Pareto tail index |
+| `sigma_s` | `float` | — | Stake dispersion |
+| `regime` | `str` | — | Wealth-skill regime |
+| `n_seeds` | `int` | `5` | Number of seeds (max 10) |
+| `sigma_bad` | `float` | `1.6` | Bad agent noise |
+
+Returns aggregated results: mean Brier scores for E/C/R, R vs C improvement (%), C vs E delta (%), and reputation separation. Capped at 5,000 questions per campaign for performance.
+
+### `generate_figure`
+
+Renders a publication-quality matplotlib figure and returns it as a markdown image.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `figure_type` | `str` | — | One of 4 types (see below) |
+| `regime` | `str` | `"A"` | Regime for the figure |
+| `alpha` | `float` | `1.7` | Tail index |
+| `sigma_s` | `float` | `1.0` | Stake dispersion |
+| `sigma_bad` | `float` | `1.6` | Bad agent noise |
+
+**Figure types:**
+
+| Type | Description |
+|------|-------------|
+| `calibration` | Predicted vs observed probability curve for E, C, and R |
+| `reputation_separation` | Boxplot of good vs bad agent final reputations |
+| `learning_dynamics` | Rolling Brier score (window=100) over all questions |
+| `inequality_sensitivity` | 2-panel: R vs C improvement and C vs E distortion vs σ_s |
+
+Figures are saved to disk and also returned as base64 data URIs injected into the chat stream. See [Figure Generation](/simulation/figures) for details on each plot type.
+
+## Tool Usage Guidelines
+
+The agent is instructed to:
+
+- Limit tool calls to 2–3 per question
+- Cite specific paper sections in responses
+- Use LaTeX notation for equations
+- Prefer `search_paper` for factual lookups and `get_section` for broader context

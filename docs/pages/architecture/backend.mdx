@@ -1,0 +1,95 @@
+# Backend Architecture
+
+The backend is a FastAPI application that serves paper content, handles chat conversations, and runs simulations.
+
+## Tech Stack
+
+| Library | Purpose |
+|---------|---------|
+| FastAPI 0.115+ | HTTP framework |
+| OpenAI Agents SDK | Agent orchestration (o4-mini) |
+| OpenAI ChatKit | Chat/thread management |
+| NumPy, SciPy | Numerical simulation |
+| Matplotlib | Figure generation |
+| Pandas | Data loading and manipulation |
+| scikit-learn | TF-IDF search indexing |
+
+## Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Health check — returns `{"status": "ok", "agent": "Paper Assistant"}` |
+| `/api/paper/full` | GET | Returns all 8 paper sections as JSON with slug, title, content, and order |
+| `/api/paper/pdf` | GET | Serves the paper PDF file |
+| `/chatkit` | POST | ChatKit request handler — routes to the paper agent |
+| `/figures` | MOUNT | Static file serving for generated PNG figures |
+
+CORS is enabled for all origins to support the Vite dev server proxy.
+
+## Paper Content
+
+The paper is stored as 8 Markdown files (`*_draft.md`) in `app/data/paper/`. On startup, the server:
+
+1. Loads each file and assigns it a section slug, title, and order
+2. Replaces figure placeholders with Markdown image syntax pointing to `/figures/`
+3. Strips per-section reference lists (references are unified in the final section)
+
+The 8 sections: Introduction, Related Work, Model & Methods, Results, Discussion, Limitations & Future Work, Conclusion, References.
+
+## ChatKit Server
+
+`PaperChatKitServer` extends ChatKit's `ChatKitServer` base class:
+
+- `respond()` is an async generator that handles incoming user messages
+- It instantiates the paper agent and runs it with up to 25 turns
+- Responses stream back as `ThreadItemAddedEvent` and `ThreadItemDoneEvent`
+- After the agent completes, any pending figure images (base64 data URIs) are injected into the stream
+
+## Agent Configuration
+
+The paper agent uses OpenAI's Agents SDK with:
+
+- **Model:** o4-mini
+- **Name:** Paper Assistant
+- **Instructions:** ~3,000 lines covering paper content, equations, findings, and behavioral guidelines
+- **Tools:** 8 function tools (see [Agent Tools](/chat/tools))
+- **Behavior:** Thoughtful research collaborator that reasons beyond explicit claims, cites sections, and limits tool calls to 2–3 per question
+
+## In-Memory Store
+
+`MemoryStore` implements ChatKit's `Store` interface for thread and message persistence:
+
+- **Threads** — conversation sessions with UUID-based IDs
+- **Thread items** — individual messages and responses
+- **Attachments** — file storage for the chat
+
+This is an MVP store. All data lives in memory and is lost on restart. It can be replaced with a database-backed implementation by swapping the store class.
+
+## Data Files
+
+```
+app/data/
+├── paper/
+│   ├── introduction_draft.md
+│   ├── related_work_draft.md
+│   ├── model_methods_draft.md
+│   ├── results_draft.md
+│   ├── discussion_draft.md
+│   ├── limitations_draft.md
+│   ├── conclusion_draft.md
+│   └── references_draft.md
+├── csv/
+│   ├── scenius_main_results.csv
+│   ├── scenius_main_perseed.csv
+│   ├── scenius_sweep_results.csv
+│   └── inequality_sweep_results.csv
+└── figures/          ← generated PNGs written here
+```
+
+## Deployment
+
+The backend includes a Dockerfile and `railway.toml` for deployment on Railway:
+
+- Default port: 8321
+- Entry point: `uvicorn app.main:app`
+- Requires `OPENAI_API_KEY` environment variable

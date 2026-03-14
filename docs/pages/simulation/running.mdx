@@ -1,0 +1,76 @@
+# Running Simulations
+
+Paper Chat includes a live simulation engine that can run Monte Carlo experiments on demand through the chat interface.
+
+## Overview
+
+The simulation models a prediction market with N agents making forecasts over J binary questions. Three aggregation mechanisms compete:
+
+| Mechanism | Symbol | Formula |
+|-----------|--------|---------|
+| Equal-weighted | E | Simple average of all predictions |
+| Capital-weighted | C | Weighted by each agent's stake |
+| Reputation-weighted | R | Weighted by reputation × stake (rᵢ · sᵢ) |
+
+## Wealth-Skill Regimes
+
+The key variable is how wealth (stake) correlates with forecasting skill:
+
+| Regime | Name | Description |
+|--------|------|-------------|
+| A | Uncorrelated | Stakes randomly assigned — no relationship to skill |
+| B | Anti-correlated | ~80% chance high-stake agents are bad forecasters |
+| C | Correlated | ~80% chance high-stake agents are good forecasters |
+
+Regime B is the adversarial case where capital distortion is worst. Regime C is the favorable case where money tracks skill.
+
+## Parameters
+
+The simulation has 11 configurable parameters (defaults shown):
+
+| Parameter | Symbol | Default | Description |
+|-----------|--------|---------|-------------|
+| Agents | N | 50 | Number of forecasting agents |
+| Questions | J | 5,000 | Binary questions per campaign |
+| Tail index | α | 1.7 | Pareto exponent for wealth distribution |
+| Wealth scale | β | 1.0 | Scale parameter for stakes |
+| Good agent noise | σ_good | 0.6 | Signal noise for skilled agents |
+| Bad agent noise | σ_bad | 1.6 | Signal noise for unskilled agents |
+| Good fraction | f_good | 0.2 | Proportion of skilled agents (20%) |
+| Stake dispersion | σ_s | 1.0 | Lognormal spread of stakes |
+| Initial reputation | r₀ | 1.0 | Starting reputation for all agents |
+| Learning rate | λ | 0.05 | Reputation update speed |
+| Penalty steepness | k | 5.0 | Exponential penalty for inaccuracy |
+
+## Agent Types
+
+Each simulation has two types of agents:
+
+- **Good agents** (20% by default) — observe a noisy signal with σ_good = 0.6
+- **Bad agents** (80% by default) — observe a noisier signal with σ_bad = 1.6
+
+Both apply a sigmoid function to their noisy signal to produce a probability estimate. A bias term is calibrated via `tune_bias()` so that the mean prediction matches a 10% base rate.
+
+## Reputation Update
+
+After each question, every agent's reputation updates:
+
+```
+r_i ← (1 − λ) · r_i + λ · exp(−k · (p_ij − Y_j)²)
+```
+
+Good agents converge to higher reputations over time because their predictions are closer to outcomes. The learning rate λ controls how quickly this happens, and the steepness k determines how harshly inaccurate predictions are penalized.
+
+## Using Simulations in Chat
+
+Ask the assistant to run a simulation by specifying parameters:
+
+- *"Run a simulation with α = 1.5 and σ_s = 2.0 in Regime B"*
+- *"What happens if we increase the bad agent noise to 2.0?"*
+- *"Compare Regime A and B with 10 seeds"*
+
+The agent calls `run_custom_simulation` which runs up to 10 seeds with a cap of 5,000 questions each, then returns aggregated results including mean Brier scores, R vs C improvement, and reputation separation.
+
+## Pre-Computed Results
+
+For the paper's main analysis, results from 630 runs (3 regimes × 210 parameter combinations) are pre-computed in CSV files. The `query_results` and `compare_mechanisms` tools access these without re-running simulations, making lookups instant.

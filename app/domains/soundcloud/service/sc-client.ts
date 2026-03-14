@@ -1,0 +1,100 @@
+import { ScUserSchema, type ScUser } from "../types/sc-user";
+import { ScTrackSchema, type ScTrack } from "../types/sc-track";
+
+const TOKEN_TTL_MS = 3500 * 1000;
+
+let cachedToken: { value: string; expiresAt: number } | null = null;
+
+async function getToken(clientId: string, clientSecret: string): Promise<string> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt) {
+    return cachedToken.value;
+  }
+
+  const credentials = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+  const res = await fetch("https://secure.soundcloud.com/oauth/token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      Accept: "application/json; charset=utf-8",
+    },
+    body: "grant_type=client_credentials",
+  });
+
+  if (!res.ok) {
+    throw new Error(`SC token request failed: ${res.status} ${await res.text()}`);
+  }
+
+  const data = await res.json();
+  cachedToken = {
+    value: data.access_token,
+    expiresAt: Date.now() + TOKEN_TTL_MS,
+  };
+
+  return cachedToken.value;
+}
+
+async function scFetch(
+  path: string,
+  token: string
+): Promise<unknown> {
+  const res = await fetch(`https://api.soundcloud.com${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json; charset=utf-8",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`SC API ${path} failed: ${res.status} ${await res.text()}`);
+  }
+
+  return res.json();
+}
+
+export function createScClient(clientId: string, clientSecret: string) {
+  async function withToken<T>(fn: (token: string) => Promise<T>): Promise<T> {
+    return fn(await getToken(clientId, clientSecret));
+  }
+
+  return {
+    async resolve(url: string): Promise<ScUser> {
+      return withToken(async (token) => {
+        const encoded = encodeURIComponent(url);
+        const data = await scFetch(`/resolve?url=${encoded}`, token);
+        const obj = data as Record<string, unknown>;
+
+        // If resolve returns a track, extract the user
+        if (obj.kind === "track" && obj.user) {
+          const user = obj.user as Record<string, unknown>;
+          return ScUserSchema.parse(
+            await scFetch(`/users/${user.id}`, token)
+          );
+        }
+
+        return ScUserSchema.parse(data);
+      });
+    },
+
+    async getUser(id: number): Promise<ScUser> {
+      return withToken(async (token) => {
+        const data = await scFetch(`/users/${id}`, token);
+        return ScUserSchema.parse(data);
+      });
+    },
+
+    async getUserTracks(id: number, limit = 50): Promise<ScTrack[]> {
+      return withToken(async (token) => {
+        const data = await scFetch(`/users/${id}/tracks?limit=${limit}`, token);
+
+        // SC API may return array or { collection: [...] }
+        const items = Array.isArray(data)
+          ? data
+          : (data as { collection?: unknown[] }).collection ?? [];
+
+        return items.map((item) => ScTrackSchema.parse(item));
+      });
+    },
+  };
+}

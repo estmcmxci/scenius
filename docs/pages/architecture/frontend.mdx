@@ -1,0 +1,110 @@
+# Frontend Architecture
+
+The frontend is a React 19 single-page application built with Vite and TypeScript.
+
+## Tech Stack
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| React | 19 | UI framework |
+| TypeScript | 5.7 | Type safety |
+| Vite | 6 | Build tool and dev server |
+| @openai/chatkit-react | 1.5 | Chat UI components |
+| react-markdown | 10.1 | Markdown rendering |
+| react-pdf | 10.4 | PDF viewer |
+| remark-math + rehype-katex | — | LaTeX math rendering |
+| KaTeX | 0.16 | Math typesetting engine |
+
+## Component Tree
+
+```
+App
+├── PaperReaderProvider (context)
+│   ├── Header
+│   │   └── Section label (animated)
+│   └── SplitLayout
+│       ├── PaperPanel (left)
+│       │   ├── View toggle (Markdown / PDF)
+│       │   ├── Reading progress bar
+│       │   ├── TableOfContents
+│       │   ├── PaperSection × 8 (via ReactMarkdown)
+│       │   ├── SelectionTooltip
+│       │   └── PdfViewer (alternate view)
+│       └── ChatPanel (right)
+│           ├── ChatKit
+│           ├── ThinkingIndicator
+│           └── SuggestedPrompts
+```
+
+## Split Layout
+
+The `SplitLayout` component renders a draggable two-column layout:
+
+- Default split: 65% left (paper), 35% right (chat)
+- Drag handle between panels with `col-resize` cursor
+- Constrained to 40–80% left width
+- State managed via `leftPercent` with mouse event handlers
+
+## Context System
+
+`PaperReaderContext` is the central state bridge between the paper reader and chat:
+
+```typescript
+interface PaperReaderState {
+  currentSection: string;
+  selectedText: string;
+  selectionRect: DOMRect | null;
+  viewMode: 'markdown' | 'pdf';
+
+  setCurrentSection(slug: string): void;
+  setSelectedText(text: string, rect: DOMRect | null): void;
+  setViewMode(mode: ViewMode): void;
+  sendToChat(text: string): void;
+  scrollToSection(slug: string): void;
+  registerChatMethods(methods: ChatMethods): void;
+  registerPaperScroll(fn: (slug: string) => void): void;
+}
+```
+
+The chat panel registers its methods (`setComposerValue`, `focusComposer`, `sendUserMessage`) with the context on mount. The paper panel registers its scroll function. This lets either side trigger actions on the other without direct coupling.
+
+## Custom Hooks
+
+### `useIntersectionTracker`
+
+Tracks which paper section is currently in the viewport using `IntersectionObserver`. Configured with a root margin of `-20% 0px -70% 0px` so sections are detected when they enter the upper portion of the scroll container.
+
+## Design System
+
+CSS custom properties define the visual language:
+
+| Token | Value |
+|-------|-------|
+| `--accent` | `#2d7a7a` |
+| `--font-heading` | IBM Plex Sans |
+| `--font-body` | Newsreader |
+| `--font-ui` | DM Sans |
+| `--font-mono` | SF Mono |
+| `--surface-page` | `#faf9f7` |
+| `--radius-md` | 6px |
+
+### Animations
+
+| Name | Effect | Duration |
+|------|--------|----------|
+| `fade-up` | Opacity + translateY | 350ms |
+| `chip-enter` | Scale + translateY | 300ms |
+| `tooltip-appear` | Opacity + translateY | 120ms |
+| `shimmer` | Background position | 1.5s loop |
+
+All animations respect `prefers-reduced-motion`.
+
+## Dev Server
+
+Vite proxies three paths to the backend at `localhost:8321`:
+
+| Path | Target |
+|------|--------|
+| `/chatkit` | Backend ChatKit endpoint |
+| `/figures` | Static figure serving |
+| `/api` | REST API (paper content, PDF) |

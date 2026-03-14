@@ -1,0 +1,50 @@
+# Paper Chat
+
+An interactive paper reader with AI-powered Q&A and live simulations, built for any research paper.
+
+## What is Paper Chat?
+
+Paper Chat is a full-stack web application that turns a static research paper into an interactive exploration tool. It pairs a rich reading experience on the left with an AI research assistant on the right — all in a single split-screen interface.
+
+The assistant doesn't just retrieve text. It can search the paper, run Monte Carlo simulations on demand, generate publication-quality figures, and reason about results in the context of the full paper.
+
+## Key Features
+
+### Reading Experience
+- **Dual view modes** — switch between rendered Markdown (with LaTeX math) and the original PDF
+- **Table of contents** with live section tracking and reading progress bar
+- **Text selection tooltip** — highlight any passage and ask the AI about it directly
+
+### AI Chat
+- **Conversational Q&A** powered by OpenAI's o4-mini model with 8 specialized tools
+- **Context-aware prompts** that change based on the section you're reading
+- **Thinking indicator** showing agent reasoning phases in real time
+
+### Live Simulations
+- **Run custom simulations** with configurable parameters (tail index, stake dispersion, regime)
+- **Generate 4 figure types** — calibration curves, reputation separation, learning dynamics, inequality sensitivity
+- **Query pre-computed results** across 630 simulation runs
+
+## Tech Stack
+
+| Layer | Stack |
+|-------|-------|
+| **Frontend** | React 19, TypeScript, Vite, ChatKit React, react-markdown, react-pdf, KaTeX |
+| **Backend** | FastAPI, OpenAI Agents SDK, ChatKit Server, NumPy, SciPy, Matplotlib |
+| **Model** | o4-mini (via OpenAI Agents SDK) |
+
+## Quick Start
+
+```bash
+# Backend
+cd paper-chat/backend
+pip install -e .
+uvicorn app.main:app --port 8321
+
+# Frontend
+cd paper-chat/frontend
+npm install
+npm run dev
+```
+
+The frontend dev server proxies API calls to the backend at `localhost:8321`.

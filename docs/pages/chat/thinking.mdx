@@ -1,0 +1,43 @@
+# Thinking Indicator
+
+When the agent is processing a request, a thinking indicator shows what phase of reasoning it's in and how long it's been working.
+
+## Phases
+
+The indicator cycles through six labeled phases as the agent works:
+
+| Phase | Label |
+|-------|-------|
+| 1 | Reading... |
+| 2 | Searching... |
+| 3 | Analyzing... |
+| 4 | Reasoning... |
+| 5 | Synthesizing... |
+| 6 | Deep thinking... |
+
+Phases advance on a timer to give visual feedback even when the agent is waiting on a single long operation. The elapsed time (in seconds) is shown alongside the phase label.
+
+## Hourglass Animation
+
+The thinking indicator features a pixel-art hourglass rendered on a 16x20 HTML canvas. The animation combines two effects:
+
+- **Rotation** — the hourglass rotates 360 degrees over 2 seconds (`hg-spin`)
+- **Fade pulse** — the opacity pulses gently over 2.5 seconds (`hg-fade`)
+
+This creates a subtle, non-distracting animation that signals activity without pulling focus from the surrounding content.
+
+## When It Appears
+
+The thinking indicator is visible whenever the agent is:
+
+- Executing tool calls (paper search, simulation, figure generation)
+- Waiting for the model to generate a response
+- Processing a multi-turn chain of tool calls
+
+It disappears as soon as the response begins streaming. For fast queries that complete in under a second, the indicator may flash briefly or not appear at all.
+
+## Streaming Responses
+
+Once the agent has finished reasoning and tool execution, the response streams into the chat. ChatKit handles the streaming display — text appears incrementally as tokens arrive from the backend.
+
+If the agent generates figures during processing, the images are injected at the end of the streamed response (after all text content), since the figure data URIs are collected in a `pending_images` list and flushed after the agent completes.

@@ -1,0 +1,53 @@
+# Navigation & Progress
+
+Paper Chat tracks your position in the paper and provides multiple navigation aids.
+
+## Table of Contents
+
+A fixed sidebar on the left lists all 8 paper sections:
+
+1. Introduction
+2. Related Work
+3. Model & Methods
+4. Results
+5. Discussion
+6. Limitations & Future Work
+7. Conclusion
+8. References
+
+Click any section to smooth-scroll to it. The active section is highlighted with a left teal border and bold text.
+
+### Animations
+
+TOC items fade in with a staggered animation (40ms delay between items) when the component mounts, giving a cascading entrance effect.
+
+## Section Tracking
+
+The `useIntersectionTracker` hook uses the Intersection Observer API to detect which section is currently in view:
+
+- **Root margin:** `-20% 0px -70% 0px` — a section is considered "active" when its top edge enters the upper 20% of the viewport
+- **Threshold:** `0` — triggers as soon as any part of the section crosses the margin
+
+All `[data-section]` elements are observed. When a new section enters the detection zone, the context updates and three things happen simultaneously:
+
+1. The **TOC** highlights the new section
+2. The **header** updates the section label with a fade animation
+3. The **suggested prompts** below the chat change to match the section
+
+## Reading Progress Bar
+
+A 2px teal bar at the top of the paper panel shows how far you've scrolled. It's computed as a fraction of total scroll height:
+
+```
+progress = scrollTop / (scrollHeight - clientHeight)
+```
+
+The bar width scales from 0% to 100% as you scroll through the paper.
+
+## Scroll-to-Section
+
+When you click a TOC entry, the app calls `scrollToSection(slug)` from the paper reader context. This:
+
+1. Finds the `[data-section="slug"]` element
+2. Scrolls the paper panel container to bring it into view with `scrollIntoView({ behavior: 'smooth' })`
+3. The intersection observer then picks up the change and updates the active state

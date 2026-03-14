@@ -1,0 +1,52 @@
+# Text Selection
+
+Select any passage in the paper and ask the AI about it — without typing a prompt from scratch.
+
+## How It Works
+
+1. **Select text** — highlight any passage longer than 3 characters in the Markdown view
+2. **Tooltip appears** — a floating "Ask about this" button positions itself above the selection
+3. **Click** — the selected text is sent to the chat composer as a prefilled prompt
+4. **Chat activates** — the composer focuses with the passage quoted, ready to send or edit
+
+## Selection Tooltip
+
+The `SelectionTooltip` component listens for `mouseup` events inside the paper container. When it detects a selection:
+
+- It reads the selection text via `window.getSelection()`
+- Filters out selections shorter than 3 characters
+- Computes the tooltip position from the selection's bounding rect
+- Renders the tooltip centered above the selection with a fade-in animation
+
+The tooltip dismisses when:
+- You click outside the selection
+- The selection is cleared
+- You click the "Ask about this" button (after sending to chat)
+
+## Auto-Compose
+
+When you click "Ask about this", the app constructs a prompt:
+
+```
+Regarding this passage: "{selected text}" —
+```
+
+The text is truncated to 300 characters if the selection is long. This prompt is set as the composer value via `sendToChat()` in the paper reader context, which calls the registered `chatMethods.setComposerValue()`.
+
+You can then:
+- **Send immediately** — the AI will interpret the passage in context
+- **Edit first** — append your specific question after the quoted passage
+
+## Integration with Context
+
+The selection flow connects the paper reader to the chat through the `PaperReaderContext`:
+
+```
+SelectionTooltip → sendToChat(text) → PaperReaderContext → chatMethods.setComposerValue()
+```
+
+This avoids tight coupling between components — the tooltip doesn't know about ChatKit directly, and the chat panel doesn't know about text selection. The context bridges them.
+
+:::info
+Text selection only works in **Markdown view**. In PDF mode, the text layer supports native browser selection but does not trigger the tooltip.
+:::
