@@ -8,6 +8,7 @@ workspace:
 hooks:
   after_create: |
     git clone git@github.com:estmcmxci/scenius.git .
+    ln -s ~/.env.scenius .env
     pnpm install
 agent:
   max_concurrent_agents: 3
@@ -27,8 +28,8 @@ Description: {{ issue.description }}
 Before starting:
 1. Read AGENTS.md — it is the map to this codebase
 2. Read the relevant spec in spec/ for the domain you're working in
-3. Run `pnpm dev` to verify the environment boots
-4. If working on the soundcloud domain, read .codex/skills/soundcloud/SKILL.md — it has tested shell scripts for SC API calls (resolve, search, snapshot) with token caching
+3. If working on the soundcloud domain, read .codex/skills/soundcloud/SKILL.md — it has tested shell scripts for SC API calls (resolve, search, snapshot) with token caching
+4. Do NOT run `pnpm dev` — the env may not have all vars. Only run dev/build to verify your specific changes if needed.
 
 Rules:
 - CLI-first: every feature must work as a CLI command before getting an API route or UI
