@@ -1,4 +1,5 @@
-import { pgTable, uuid, text, bigint, timestamp, index } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { pgTable, uuid, text, bigint, timestamp, index, check } from "drizzle-orm/pg-core";
 import { artists, catalogSnapshots } from "@/app/domains/soundcloud/repo/schema";
 import { tastemakers } from "@/app/domains/tastemakers/repo/schema";
 
@@ -15,7 +16,7 @@ export const predictions = pgTable(
     snapshotId: uuid("snapshot_id")
       .notNull()
       .references(() => catalogSnapshots.id),
-    streamThreshold: bigint("stream_threshold", { mode: "bigint" }),
+    streamThreshold: bigint("stream_threshold", { mode: "bigint" }).notNull(),
     predictedOutcome: text("predicted_outcome").notNull(),
     horizon: text("horizon").notNull(),
     outcome: text("outcome").default("pending"),
@@ -29,5 +30,8 @@ export const predictions = pgTable(
   (table) => [
     index("idx_predictions_tastemaker").on(table.tastemakerId),
     index("idx_predictions_outcome").on(table.outcome),
+    check("chk_predicted_outcome", sql`${table.predictedOutcome} in ('yes', 'no')`),
+    check("chk_horizon", sql`${table.horizon} in ('1w', '2w', '4w', '8w')`),
+    check("chk_outcome", sql`${table.outcome} in ('pending', 'yes', 'no')`),
   ]
 );
