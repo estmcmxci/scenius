@@ -10,6 +10,14 @@ const envSchema = z.object({
   NEXT_PUBLIC_APP_URL: z.string().url(),
 });
 
+const databaseEnvSchema = z.object({
+  DATABASE_URL: z.string().url(),
+});
+
+const cronEnvSchema = z.object({
+  CRON_SECRET: z.string().min(1),
+});
+
 export type Env = z.infer<typeof envSchema>;
 
 export function getEnv(): Env {
@@ -19,4 +27,24 @@ export function getEnv(): Env {
     throw new Error("Invalid environment variables");
   }
   return parsed.data;
+}
+
+export function getDatabaseUrl(): string {
+  const parsed = databaseEnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    console.error("Invalid database environment variables:", parsed.error.flatten().fieldErrors);
+    throw new Error("Invalid database environment variables");
+  }
+
+  return parsed.data.DATABASE_URL;
+}
+
+export function getCronSecret(): string {
+  const parsed = cronEnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    console.error("Invalid cron environment variables:", parsed.error.flatten().fieldErrors);
+    throw new Error("Invalid cron environment variables");
+  }
+
+  return parsed.data.CRON_SECRET;
 }

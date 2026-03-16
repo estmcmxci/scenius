@@ -5,6 +5,11 @@ const args = process.argv.slice(3);
 
 async function main() {
   switch (command) {
+    case "resolve": {
+      const { resolveCommand } = await import("./resolve");
+      await resolveCommand();
+      break;
+    }
     case "snapshot": {
       if (!args[0]) {
         console.error("Usage: pnpm cli snapshot <soundcloud-url>");
@@ -16,7 +21,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: snapshot");
+      console.error("Available commands: resolve, snapshot");
       process.exit(1);
   }
 }
