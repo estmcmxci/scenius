@@ -19,9 +19,14 @@ async function main() {
       await snapshotCommand(args[0]);
       break;
     }
+    case "feed": {
+      const { feedCommand } = await import("./feed");
+      await feedCommand(args[0]);
+      break;
+    }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: resolve, snapshot");
+      console.error("Available commands: feed, resolve, snapshot");
       process.exit(1);
   }
 }
