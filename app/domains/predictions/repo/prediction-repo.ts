@@ -32,3 +32,26 @@ export async function getPredictionById(id: string): Promise<PredictionDetail | 
 
   return rows[0] ?? null;
 }
+
+export async function createPrediction(params: {
+  tastemakerId: string;
+  artistId: string;
+  snapshotId: string;
+  streamThreshold: bigint;
+  predictedOutcome: string;
+  horizon: string;
+}): Promise<string> {
+  const [inserted] = await db
+    .insert(predictions)
+    .values({
+      tastemakerId: params.tastemakerId,
+      artistId: params.artistId,
+      snapshotId: params.snapshotId,
+      streamThreshold: params.streamThreshold,
+      predictedOutcome: params.predictedOutcome,
+      horizon: params.horizon,
+    })
+    .returning({ id: predictions.id });
+
+  return inserted.id;
+}

@@ -39,9 +39,20 @@ async function main() {
       await feedCommand(args[0]);
       break;
     }
+    case "predict": {
+      if (!args[0]) {
+        console.error(
+          "Usage: pnpm cli predict <url> --threshold <number> --horizon <1w|2w|4w|8w> --outcome <yes|no> --tastemaker <uuid>"
+        );
+        process.exit(1);
+      }
+      const { predictCommand } = await import("./predict");
+      await predictCommand(args[0], args.slice(1));
+      break;
+    }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, prediction, resolve, seed, snapshot, tastemaker");
+      console.error("Available commands: feed, predict, prediction, resolve, seed, snapshot, tastemaker");
       process.exit(1);
   }
 }
