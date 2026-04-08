@@ -19,7 +19,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
 
-    if (message.includes("SoundCloud") || message.includes("SC API")) {
+    if (message.includes("SoundCloud") || message.includes("SC API") || message.includes("SC token")) {
       return NextResponse.json(
         { error: "Failed to fetch from SoundCloud", details: message },
         { status: 502 }
