@@ -10,6 +10,11 @@ async function main() {
       await resolveCommand();
       break;
     }
+    case "tastemaker": {
+      const { tastemakerCommand } = await import("./tastemaker");
+      await tastemakerCommand(args[0]);
+      break;
+    }
     case "snapshot": {
       if (!args[0]) {
         console.error("Usage: pnpm cli snapshot <soundcloud-url>");
@@ -26,7 +31,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, resolve, snapshot");
+      console.error("Available commands: feed, resolve, snapshot, tastemaker");
       process.exit(1);
   }
 }
