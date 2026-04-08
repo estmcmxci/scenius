@@ -60,7 +60,7 @@ export function FeedCard({ item }: Props) {
           <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
             {item.snapshotPlays !== null && (
               <span>
-                {item.snapshotPlays.toLocaleString()} plays
+                {item.snapshotPlays.toLocaleString()} plays at prediction
                 <span className="ml-1 text-gray-400">via SoundCloud</span>
               </span>
             )}
