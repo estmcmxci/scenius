@@ -37,7 +37,7 @@ export function ArtistPreview({ url }: Props) {
       return;
     }
 
-    let cancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
     setData(null);
@@ -46,26 +46,35 @@ export function ArtistPreview({ url }: Props) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
+      signal: controller.signal,
     })
       .then(async (res) => {
         if (!res.ok) {
           const body = await res.json().catch(() => null);
-          throw new Error(body?.details ?? body?.error ?? "Failed to fetch artist");
+          const details = body?.details;
+          const message =
+            typeof details === "string"
+              ? details
+              : details && typeof details === "object"
+                ? Object.values(details).flat().join(", ")
+                : body?.error ?? "Failed to fetch artist";
+          throw new Error(message);
         }
         return res.json();
       })
       .then((json) => {
-        if (!cancelled) setData(json);
+        if (!controller.signal.aborted) setData(json);
       })
       .catch((err) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Unknown error");
+        if (controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : "Unknown error");
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       });
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [url]);
 
