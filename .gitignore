@@ -54,5 +54,8 @@ Thumbs.db
 .vscode/
 .idea/
 
+# Build cache
+tsconfig.tsbuildinfo
+
 # Claude / MCP
 .claude/settings.local.json
