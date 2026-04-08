@@ -10,6 +10,11 @@ async function main() {
       await seedCommand();
       break;
     }
+    case "prediction": {
+      const { predictionCommand } = await import("./prediction");
+      await predictionCommand(args[0]);
+      break;
+    }
     case "resolve": {
       const { resolveCommand } = await import("./resolve");
       await resolveCommand();
@@ -36,7 +41,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, resolve, seed, snapshot, tastemaker");
+      console.error("Available commands: feed, prediction, resolve, seed, snapshot, tastemaker");
       process.exit(1);
   }
 }
