@@ -25,6 +25,15 @@ async function main() {
       await tastemakerCommand(args[0]);
       break;
     }
+    case "preview": {
+      if (!args[0]) {
+        console.error("Usage: pnpm cli preview <soundcloud-url>");
+        process.exit(1);
+      }
+      const { previewCommand } = await import("./preview");
+      await previewCommand(args[0]);
+      break;
+    }
     case "snapshot": {
       if (!args[0]) {
         console.error("Usage: pnpm cli snapshot <soundcloud-url>");
@@ -52,7 +61,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, predict, prediction, resolve, seed, snapshot, tastemaker");
+      console.error("Available commands: feed, predict, prediction, preview, resolve, seed, snapshot, tastemaker");
       process.exit(1);
   }
 }
