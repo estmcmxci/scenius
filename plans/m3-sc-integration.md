@@ -93,6 +93,7 @@ Response: { "artistId": "uuid", "snapshotId": "uuid", "artist": {...}, "totals":
 
 ### SCE-M3-4: Vercel Cron stub for Friday resolution
 
+**Status:** Done
 **Title:** Add Vercel Cron route stub for weekly resolution
 
 **Description:**
@@ -114,12 +115,14 @@ Add the cron schedule to `vercel.json`. This stub proves the cron infrastructure
 ```
 
 **Acceptance criteria:**
-- [ ] `GET /api/cron/resolve` with valid `CRON_SECRET` header returns 200
-- [ ] Missing/invalid secret returns 401
-- [ ] `vercel.json` has the cron entry
-- [ ] Route queries pending predictions and logs count (even if 0)
+- [x] `GET /api/cron/resolve` with valid `CRON_SECRET` header returns 200
+- [x] Missing/invalid secret returns 401
+- [x] `vercel.json` has the cron entry
+- [x] Route queries pending predictions and logs count (even if 0)
 
 **Files:** `app/api/cron/resolve/route.ts`, `vercel.json`
+
+**Summary:** Route protects `/api/cron/resolve` behind `CRON_SECRET`, lists due pending predictions, logs the count, and the cron in `vercel.json` fires every Friday at 12:00 UTC.
 
 ---
 
