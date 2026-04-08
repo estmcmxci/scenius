@@ -32,6 +32,12 @@ export async function submitPrediction(
     env.SOUNDCLOUD_CLIENT_SECRET
   );
 
+  if (snapshot.totals.tracksFetched === 0) {
+    throw new Error(
+      `No tracks returned for ${snapshot.artist.username}. Artist may be label-distributed and unsupported by the SC API.`
+    );
+  }
+
   const artistId = await upsertArtist(snapshot);
   const snapshotId = await insertSnapshot(artistId, snapshot);
 
