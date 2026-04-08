@@ -1,9 +1,9 @@
 # Plan: M0–M2 — Scaffold + SC Integration
 
-**Status:** Active
+**Status:** Done
 **Milestone:** PRD M0 (Mar 14) + M1 (Mar 21) + M2 (Mar 21)
 **Owner:** Solo builder
-**Updated:** 2026-03-12
+**Updated:** 2026-04-08
 
 ## Goal
 
@@ -13,17 +13,17 @@ metrics and store a snapshot. No UI yet.
 
 ## Steps
 
-- [ ] M0: Confirm SC API credentials work (client credentials flow)
-- [ ] M0: Test `GET /resolve?url=` and `GET /users/{id}/tracks` against a real SC URL
-- [ ] M2: `npx create-next-app@latest app` — Next.js 15, App Router, Tailwind, TypeScript
-- [ ] M2: Set up Supabase project, add `DATABASE_URL` to `.env`
-- [ ] M2: Install Drizzle ORM, create initial migration from PRD data model
-- [ ] M2: Implement `app/config/env.ts` — Zod-validated env vars (fail fast)
-- [ ] M2: Implement `app/domains/soundcloud/` — SC API client + Zod response schemas
-- [ ] M2: Implement `catalog_snapshots` repo layer
-- [ ] M3: Implement snapshot-on-demand service function
-- [ ] M3: Wire Vercel Cron job stub for Friday resolution
-- [ ] M3: Smoke test: submit a snapshot for a real SC artist URL, confirm DB write
+- [x] M0: Confirm SC API credentials work (client credentials flow)
+- [x] M0: Test `GET /resolve?url=` and `GET /users/{id}/tracks` against a real SC URL
+- [x] M2: `npx create-next-app@latest app` — Next.js 15, App Router, Tailwind, TypeScript
+- [x] M2: Set up Supabase project, add `DATABASE_URL` to `.env`
+- [x] M2: Install Drizzle ORM, create initial migration from PRD data model
+- [x] M2: Implement `app/config/env.ts` — Zod-validated env vars (fail fast)
+- [x] M2: Implement `app/domains/soundcloud/` — SC API client + Zod response schemas
+- [x] M2: Implement `catalog_snapshots` repo layer
+- [x] M3: Implement snapshot-on-demand service function
+- [x] M3: Wire Vercel Cron job stub for Friday resolution
+- [x] M3: Smoke test: submit a snapshot for a real SC artist URL, confirm DB write
 
 ## Decisions
 
