@@ -16,17 +16,38 @@ Target: live demo at ETHConf NYC, June 8–10, 2026.
 ```
 /
 ├── AGENTS.md          ← you are here (table of contents)
+├── CLAUDE.md          ← project rules for Claude Code (loaded every conversation)
 ├── ARCHITECTURE.md    ← domain map, layer model, package boundaries
 ├── BELIEFS.md         ← golden principles, invariants, tech choices
 ├── QUALITY.md         ← per-domain quality grades, known debt
 ├── PRD.md             ← product requirements (v0.4 MVP)
 ├── EED.md             ← engineering execution design
 ├── plans/             ← execution plans (versioned, checked in)
-│   └── m0-scaffold.md ← active: Next.js scaffold + Supabase setup
-├── app/               ← Next.js 15 application (to be created)
-├── research/          ← simulation, theory, notebooks
+│   ├── m0-scaffold.md
+│   ├── m3-sc-integration.md
+│   ├── m4-feed-profiles.md
+│   └── m5-prediction-flow.md
+├── app/               ← Next.js 15 application
+│   ├── api/           ← Route handlers
+│   │   ├── cron/resolve/route.ts    ← Friday resolution cron stub
+│   │   └── snapshots/route.ts       ← POST on-demand snapshot
+│   ├── cli/           ← CLI commands (feed, resolve, snapshot, tastemaker)
+│   ├── components/    ← Shared UI (prediction-card)
+│   ├── config/        ← Zod-validated env vars
+│   ├── db/            ← Drizzle client, schema, migrations
+│   ├── domains/
+│   │   ├── feed/          ← types, repo, service
+│   │   ├── predictions/   ← schema
+│   │   ├── resolution/    ← repo, service (cron stub)
+│   │   ├── soundcloud/    ← SC client, snapshot service, repo, types
+│   │   └── tastemakers/   ← repo, service
+│   ├── tastemakers/[id]/  ← Profile page
+│   ├── layout.tsx
+│   └── page.tsx
+├── spec/              ← Implementation reference (data-model, sc-api, eas, etc.)
+├── research/          ← Simulation, theory, analysis docs
 ├── docs/              ← Vocs documentation site (public)
-├── scenius-paper/     ← academic paper + frontend reader
+├── scenius-paper/     ← Academic paper + frontend reader (submodule)
 └── .env               ← secrets (gitignored)
 ```
 
@@ -66,12 +87,13 @@ Full rationale in `EED.md` § 2 and `ARCHITECTURE.md`.
 ## Key Docs
 
 ### Top-level
+- Project rules for Claude → `CLAUDE.md`
 - Architecture + domains → `ARCHITECTURE.md`
 - Invariants + golden rules → `BELIEFS.md`
 - Quality + known debt → `QUALITY.md`
 - Product scope → `PRD.md`
 - Engineering decisions → `EED.md`
-- Active build plan → `plans/m0-scaffold.md`
+- Plans → `plans/m3-sc-integration.md`, `plans/m4-feed-profiles.md`, `plans/m5-prediction-flow.md`
 
 ### spec/ — implementation reference (read when working on a specific domain)
 - `spec/data-model.md` — full Supabase schema (artists, catalog_snapshots, tastemakers, predictions, posts)
