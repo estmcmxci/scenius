@@ -5,6 +5,11 @@ const args = process.argv.slice(3);
 
 async function main() {
   switch (command) {
+    case "seed": {
+      const { seedCommand } = await import("./seed");
+      await seedCommand();
+      break;
+    }
     case "resolve": {
       const { resolveCommand } = await import("./resolve");
       await resolveCommand();
@@ -31,7 +36,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, resolve, snapshot, tastemaker");
+      console.error("Available commands: feed, resolve, seed, snapshot, tastemaker");
       process.exit(1);
   }
 }
