@@ -4,9 +4,17 @@ import { getEnv } from "@/app/config/env";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
 import { upsertArtist, insertSnapshot } from "@/app/domains/soundcloud/repo/snapshot-repo";
 
+const ALLOWED_HOSTS = ["soundcloud.com", "www.soundcloud.com", "m.soundcloud.com"];
+
 const SnapshotRequestSchema = z.object({
   url: z.string().url().refine(
-    (u) => u.includes("soundcloud.com"),
+    (u) => {
+      try {
+        return ALLOWED_HOSTS.includes(new URL(u).hostname);
+      } catch {
+        return false;
+      }
+    },
     { message: "URL must be a SoundCloud URL" }
   ),
 });
