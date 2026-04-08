@@ -15,7 +15,7 @@ export default function SubmitPage() {
   const [url, setUrl] = useState("");
   const [debouncedUrl, setDebouncedUrl] = useState("");
   const [streamThreshold, setStreamThreshold] = useState("");
-  const [predictedOutcome, setPredictedOutcome] = useState<boolean>(true);
+  const [predictedOutcome, setPredictedOutcome] = useState<"yes" | "no">("yes");
   const [horizon, setHorizon] = useState<Horizon>("2w");
   const [tastemakerId, setTastemakerId] = useState("");
 
@@ -134,15 +134,15 @@ export default function SubmitPage() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() => setPredictedOutcome(true)}
-              className={toggleClass(predictedOutcome === true)}
+              onClick={() => setPredictedOutcome("yes")}
+              className={toggleClass(predictedOutcome === "yes")}
             >
               Yes &mdash; will hit threshold
             </button>
             <button
               type="button"
-              onClick={() => setPredictedOutcome(false)}
-              className={toggleClass(predictedOutcome === false)}
+              onClick={() => setPredictedOutcome("no")}
+              className={toggleClass(predictedOutcome === "no")}
             >
               No &mdash; won&apos;t hit threshold
             </button>
