@@ -91,6 +91,31 @@ async function snapshotArtist(artistId: string): Promise<CatalogSnapshot> {
 
 ---
 
+## Known Limitation: Distributed Artists
+
+The `/users/{id}/tracks` endpoint returns empty arrays for artists whose
+catalogs are managed by a distributor or label (e.g., DistroKid, TuneCore,
+UnitedMasters, major labels). This is an SC API restriction under client
+credentials auth — not a bug in our code.
+
+**Affected:** Kaytranada (750K followers, label-distributed) — 0 tracks returned.
+
+**Not affected:** Indie/self-distributed artists — our target demographic:
+- Knxwledge (174K followers) — tracks + play counts returned
+- RIZ LA VIE (5.7K followers) — 48K plays across 8 tracks
+- Quiet Luke (2.7K followers) — 452 plays across 9 tracks
+- André Molina (285 followers) — 7 plays across 2 tracks
+
+This aligns with the product thesis: Scenius predicts on pre-breakout artists.
+Once an artist is distributed, they've effectively "broken out" in the context
+this market cares about. The API restriction acts as a natural boundary.
+
+**Implication for seeding:** Only use indie/self-distributed artists for seed
+predictions. Validate that `getUserTracks` returns >0 tracks before creating
+a prediction.
+
+---
+
 ## Rate Limits
 
 - Standard registered app: 15,000 requests/hour
