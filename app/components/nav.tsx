@@ -15,12 +15,12 @@ export function Nav() {
           >
             Resolved
           </Link>
-          <span
-            className="rounded-md bg-gray-300 px-3.5 py-1.5 text-sm font-medium text-gray-500 cursor-not-allowed"
-            title="Coming soon"
+          <Link
+            href="/submit"
+            className="rounded-md bg-gray-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
           >
             Submit Prediction
-          </span>
+          </Link>
         </div>
       </div>
     </nav>
