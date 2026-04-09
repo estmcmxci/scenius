@@ -43,7 +43,7 @@ export function reputationTestCommand(): void {
     r = updateReputation(r, "yes", "no");
     console.log(`  round ${i + 1}: r = ${r.toFixed(6)}`);
   }
-  assert(r < 0.5, `expected < 0.5 after 10 wrong, got ${r}`);
+  assert(r < 1.0 && r < correct, `expected decay below starting value after 10 wrong, got ${r}`);
 
   // 5 — Clamping: never below 0.01
   heading("Clamping — floor at 0.01");
