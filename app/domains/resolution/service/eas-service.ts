@@ -48,10 +48,9 @@ export async function attestPredictionOutcome(params: {
   const encoder = new SchemaEncoder(PREDICTION_SCHEMA);
   const now = BigInt(Math.floor(Date.now() / 1000));
 
-  // Convert predictionId string to bytes32 (pad to 32 bytes)
-  const predictionIdBytes = ethers.zeroPadValue(
-    ethers.toUtf8Bytes(params.predictionId.slice(0, 31)),
-    32
+  // Hash the prediction UUID to get a canonical bytes32 value
+  const predictionIdBytes = ethers.keccak256(
+    ethers.toUtf8Bytes(params.predictionId)
   );
 
   const encodedData = encoder.encodeData([
