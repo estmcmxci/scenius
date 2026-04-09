@@ -18,6 +18,12 @@ const cronEnvSchema = z.object({
   CRON_SECRET: z.string().min(1),
 });
 
+const easEnvSchema = z.object({
+  EAS_PRIVATE_KEY: z.string().min(1),
+  EAS_SCHEMA_UID_PREDICTION: z.string().min(1),
+  EAS_SCHEMA_UID_REPUTATION: z.string().min(1),
+});
+
 export type Env = z.infer<typeof envSchema>;
 
 export function getEnv(): Env {
@@ -47,4 +53,16 @@ export function getCronSecret(): string {
   }
 
   return parsed.data.CRON_SECRET;
+}
+
+export type EasEnv = z.infer<typeof easEnvSchema>;
+
+export function getEasConfig(): EasEnv {
+  const parsed = easEnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    console.error("Invalid EAS environment variables:", parsed.error.flatten().fieldErrors);
+    throw new Error("Invalid EAS environment variables");
+  }
+
+  return parsed.data;
 }
