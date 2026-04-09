@@ -184,6 +184,30 @@ app/
 
 ---
 
+## EAS CLI (easctl)
+
+`easctl` is installed at `~/easctl` for interacting with Ethereum Attestation Service.
+Use it for schema registration and attestation testing — not for production code.
+
+```bash
+npx easctl --help
+```
+
+**When to use:**
+- Registering attestation schemas on testnet (`easctl schema-register --chain base-sepolia`)
+- Testing attestation writes manually before wiring into the resolution service
+- Inspecting existing attestations (`easctl get-attestation --uid ... --decode`)
+- Dry-run gas estimation (`--dry-run` flag)
+
+**When NOT to use:**
+- Production attestation writes — use `@ethereum-attestation-service/eas-sdk` in the resolution service
+- Anything requiring programmatic control — easctl is for manual/interactive use only
+
+**Config:** `easctl set-key` stores a private key at `~/.easctl`. Or set `EAS_PRIVATE_KEY` env var.
+**Schemas:** Defined in `spec/eas.md`. Register on Base Sepolia for MVP, mainnet only after human approval.
+
+---
+
 ## Key Reference Files
 
 - `AGENTS.md` — repo map and entry point
