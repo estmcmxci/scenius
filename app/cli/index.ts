@@ -58,6 +58,11 @@ async function main() {
       reputationTestCommand();
       break;
     }
+    case "attest-test": {
+      const { attestTestCommand } = await import("./attest-test");
+      await attestTestCommand();
+      break;
+    }
     case "predict": {
       if (!args[0]) {
         console.error(
@@ -71,7 +76,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, predict, prediction, preview, reputation-test, resolve, seed, snapshot, snapshot-all, tastemaker");
+      console.error("Available commands: attest-test, feed, predict, prediction, preview, reputation-test, resolve, seed, snapshot, snapshot-all, tastemaker");
       process.exit(1);
   }
 }
