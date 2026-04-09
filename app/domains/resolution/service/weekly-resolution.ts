@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { getEnv } from "@/app/config/env";
 import { listDuePendingPredictions } from "@/app/domains/resolution/repo/due-predictions";
@@ -73,27 +73,35 @@ async function resolveSingle(
   const currentScore = await getTastemakerScore(pred.tastemakerId);
   const newReputation = updateReputation(currentScore, predictedOutcome, actualOutcome);
 
-  await db
-    .update(predictions)
-    .set({
-      outcome: actualOutcome,
-      resolvedAt: new Date(),
-      resolutionSnapshotId,
-    })
-    .where(eq(predictions.id, pred.id));
+  await db.transaction(async (tx) => {
+    const updated = await tx
+      .update(predictions)
+      .set({
+        outcome: actualOutcome,
+        resolvedAt: new Date(),
+        resolutionSnapshotId,
+      })
+      .where(and(eq(predictions.id, pred.id), eq(predictions.outcome, "pending")))
+      .returning({ id: predictions.id });
 
-  await db
-    .update(tastemakers)
-    .set({
-      reputationScore: newReputation,
-      totalPredictions: (await db
-        .select({ total: tastemakers.totalPredictions })
-        .from(tastemakers)
-        .where(eq(tastemakers.id, pred.tastemakerId))
-        .limit(1)
-        .then(r => (r[0]?.total ?? 0) + 1)),
-    })
-    .where(eq(tastemakers.id, pred.tastemakerId));
+    if (updated.length === 0) {
+      throw new Error(`Prediction ${pred.id}: already resolved (concurrent run)`);
+    }
+
+    const current = await tx
+      .select({ total: tastemakers.totalPredictions })
+      .from(tastemakers)
+      .where(eq(tastemakers.id, pred.tastemakerId))
+      .limit(1);
+
+    await tx
+      .update(tastemakers)
+      .set({
+        reputationScore: newReputation,
+        totalPredictions: (current[0]?.total ?? 0) + 1,
+      })
+      .where(eq(tastemakers.id, pred.tastemakerId));
+  });
 
   return { predictionId: pred.id, outcome: actualOutcome, delta, newReputation };
 }
