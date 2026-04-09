@@ -43,6 +43,11 @@ async function main() {
       await snapshotCommand(args[0]);
       break;
     }
+    case "snapshot-all": {
+      const { snapshotAllCommand } = await import("./snapshot-all");
+      await snapshotAllCommand();
+      break;
+    }
     case "feed": {
       const { feedCommand } = await import("./feed");
       await feedCommand(args[0]);
@@ -66,7 +71,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, predict, prediction, preview, reputation-test, resolve, seed, snapshot, tastemaker");
+      console.error("Available commands: feed, predict, prediction, preview, reputation-test, resolve, seed, snapshot, snapshot-all, tastemaker");
       process.exit(1);
   }
 }
