@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPredictionDetail } from "@/app/domains/predictions/service/prediction-service";
+import { getAttestationUrl } from "@/app/config/eas";
 
 const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -156,6 +157,19 @@ export default async function PredictionPage({ params }: Props) {
         )}
         {prediction.resolvedAt && (
           <p>Resolved: {new Date(prediction.resolvedAt).toLocaleDateString()}</p>
+        )}
+        {prediction.easAttestationUid && (
+          <p>
+            Attestation:{" "}
+            <a
+              href={getAttestationUrl(prediction.easAttestationUid)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 underline"
+            >
+              View on EAS
+            </a>
+          </p>
         )}
         <p className="mt-1 font-mono">{prediction.id}</p>
       </section>

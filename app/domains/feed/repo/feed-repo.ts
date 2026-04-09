@@ -23,6 +23,7 @@ export type FeedRow = {
   snapshotLikes: bigint | null;
   snapshotReposts: bigint | null;
   snapshotFollowers: bigint | null;
+  easAttestationUid: string | null;
 };
 
 export async function getFeedRows(filters?: FeedFilters): Promise<FeedRow[]> {
@@ -54,6 +55,7 @@ export async function getFeedRows(filters?: FeedFilters): Promise<FeedRow[]> {
       snapshotLikes: catalogSnapshots.totalLikes,
       snapshotReposts: catalogSnapshots.totalReposts,
       snapshotFollowers: catalogSnapshots.followersCount,
+      easAttestationUid: predictions.easAttestationUid,
     })
     .from(predictions)
     .innerJoin(artists, eq(predictions.artistId, artists.id))

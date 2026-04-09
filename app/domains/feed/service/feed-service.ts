@@ -26,5 +26,6 @@ export async function getFeedItems(filters?: FeedFilters): Promise<FeedItem[]> {
     snapshotLikes: toNumber(row.snapshotLikes),
     snapshotReposts: toNumber(row.snapshotReposts),
     snapshotFollowers: toNumber(row.snapshotFollowers),
+    easAttestationUid: row.easAttestationUid,
   }));
 }

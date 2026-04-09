@@ -1,9 +1,13 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, or, isNull } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { getEnv } from "@/app/config/env";
 import { listDuePendingPredictions } from "@/app/domains/resolution/repo/due-predictions";
 import type { DuePrediction } from "@/app/domains/resolution/repo/due-predictions";
 import { updateReputation } from "@/app/domains/resolution/service/reputation";
+import {
+  attestPredictionOutcome,
+  attestReputationSnapshot,
+} from "@/app/domains/resolution/service/eas-service";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
 import { upsertArtist, insertSnapshot } from "@/app/domains/soundcloud/repo/snapshot-repo";
 import { catalogSnapshots } from "@/app/domains/soundcloud/repo/schema";
@@ -36,14 +40,28 @@ async function getCreationPlays(snapshotId: string): Promise<bigint | null> {
   return rows[0]?.totalPlays ?? null;
 }
 
-async function getTastemakerScore(tastemakerId: string): Promise<number> {
+interface TastemakerInfo {
+  reputationScore: number;
+  walletAddress: string | null;
+  totalPredictions: number;
+}
+
+async function getTastemakerInfo(tastemakerId: string): Promise<TastemakerInfo> {
   const rows = await db
-    .select({ reputationScore: tastemakers.reputationScore })
+    .select({
+      reputationScore: tastemakers.reputationScore,
+      walletAddress: tastemakers.walletAddress,
+      totalPredictions: tastemakers.totalPredictions,
+    })
     .from(tastemakers)
     .where(eq(tastemakers.id, tastemakerId))
     .limit(1);
 
-  return rows[0]?.reputationScore ?? 1.0;
+  return {
+    reputationScore: rows[0]?.reputationScore ?? 1.0,
+    walletAddress: rows[0]?.walletAddress ?? null,
+    totalPredictions: rows[0]?.totalPredictions ?? 0,
+  };
 }
 
 async function resolveSingle(
@@ -70,8 +88,8 @@ async function resolveSingle(
   const actualOutcome: BinaryOutcome = delta >= threshold ? "yes" : "no";
   const predictedOutcome = pred.predictedOutcome as BinaryOutcome;
 
-  const currentScore = await getTastemakerScore(pred.tastemakerId);
-  const newReputation = updateReputation(currentScore, predictedOutcome, actualOutcome);
+  const info = await getTastemakerInfo(pred.tastemakerId);
+  const newReputation = updateReputation(info.reputationScore, predictedOutcome, actualOutcome);
 
   await db.transaction(async (tx) => {
     const updated = await tx
@@ -88,20 +106,74 @@ async function resolveSingle(
       throw new Error(`Prediction ${pred.id}: already resolved (concurrent run)`);
     }
 
-    const current = await tx
-      .select({ total: tastemakers.totalPredictions })
-      .from(tastemakers)
-      .where(eq(tastemakers.id, pred.tastemakerId))
-      .limit(1);
-
     await tx
       .update(tastemakers)
       .set({
         reputationScore: newReputation,
-        totalPredictions: (current[0]?.total ?? 0) + 1,
+        totalPredictions: info.totalPredictions + 1,
       })
       .where(eq(tastemakers.id, pred.tastemakerId));
   });
+
+  // Write EAS attestations (best-effort — prediction is resolved either way)
+  let attestationUid: string | null = null;
+  if (info.walletAddress) {
+    try {
+      attestationUid = await attestPredictionOutcome({
+        predictionId: pred.id,
+        tastemakerAddress: info.walletAddress,
+        predictedYes: predictedOutcome === "yes",
+        outcomeYes: actualOutcome === "yes",
+        streamThreshold: pred.streamThreshold,
+        scDelta: BigInt(Math.max(0, delta)),
+      });
+
+      await db
+        .update(predictions)
+        .set({ easAttestationUid: attestationUid })
+        .where(eq(predictions.id, pred.id));
+
+      console.info(JSON.stringify({
+        event: "cron.resolve.eas_prediction",
+        predictionId: pred.id,
+        attestationUid,
+      }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(JSON.stringify({
+        event: "cron.resolve.eas_prediction_error",
+        predictionId: pred.id,
+        error: message,
+      }));
+    }
+
+    try {
+      const repUid = await attestReputationSnapshot({
+        tastemakerAddress: info.walletAddress,
+        reputationScore: newReputation,
+        totalPredictions: info.totalPredictions + 1,
+      });
+
+      console.info(JSON.stringify({
+        event: "cron.resolve.eas_reputation",
+        tastemakerId: pred.tastemakerId,
+        attestationUid: repUid,
+      }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(JSON.stringify({
+        event: "cron.resolve.eas_reputation_error",
+        tastemakerId: pred.tastemakerId,
+        error: message,
+      }));
+    }
+  } else {
+    console.info(JSON.stringify({
+      event: "cron.resolve.eas_skipped",
+      predictionId: pred.id,
+      reason: "no wallet address",
+    }));
+  }
 
   return { predictionId: pred.id, outcome: actualOutcome, delta, newReputation };
 }
@@ -154,6 +226,70 @@ export async function runWeeklyResolution(now: Date): Promise<ResolutionResult> 
     skipped: result.skipped,
     errors: result.errors,
   }));
+
+  return result;
+}
+
+export async function retryUnattested(): Promise<{ retried: number; succeeded: number; failed: number }> {
+  const unattested = await db
+    .select({
+      id: predictions.id,
+      predictedOutcome: predictions.predictedOutcome,
+      outcome: predictions.outcome,
+      streamThreshold: predictions.streamThreshold,
+      snapshotId: predictions.snapshotId,
+      resolutionSnapshotId: predictions.resolutionSnapshotId,
+      tastemakerId: predictions.tastemakerId,
+    })
+    .from(predictions)
+    .where(
+      and(
+        or(eq(predictions.outcome, "yes"), eq(predictions.outcome, "no")),
+        isNull(predictions.easAttestationUid)
+      )
+    );
+
+  const result = { retried: unattested.length, succeeded: 0, failed: 0 };
+
+  for (const pred of unattested) {
+    const info = await getTastemakerInfo(pred.tastemakerId);
+    if (!info.walletAddress) {
+      result.failed++;
+      continue;
+    }
+
+    const creationPlays = await getCreationPlays(pred.snapshotId);
+    let delta = 0;
+    if (creationPlays !== null && pred.resolutionSnapshotId) {
+      const resRows = await db
+        .select({ totalPlays: catalogSnapshots.totalPlays })
+        .from(catalogSnapshots)
+        .where(eq(catalogSnapshots.id, pred.resolutionSnapshotId))
+        .limit(1);
+      const resPlays = resRows[0]?.totalPlays ?? BigInt(0);
+      delta = Math.max(0, Number(resPlays) - Number(creationPlays));
+    }
+
+    try {
+      const uid = await attestPredictionOutcome({
+        predictionId: pred.id,
+        tastemakerAddress: info.walletAddress,
+        predictedYes: pred.predictedOutcome === "yes",
+        outcomeYes: pred.outcome === "yes",
+        streamThreshold: pred.streamThreshold,
+        scDelta: BigInt(delta),
+      });
+
+      await db
+        .update(predictions)
+        .set({ easAttestationUid: uid })
+        .where(eq(predictions.id, pred.id));
+
+      result.succeeded++;
+    } catch {
+      result.failed++;
+    }
+  }
 
   return result;
 }
