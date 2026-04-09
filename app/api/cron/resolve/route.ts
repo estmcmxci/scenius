@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCronSecret } from "@/app/config/env";
-import { runWeeklyResolutionStub } from "@/app/domains/resolution/service/weekly-resolution";
+import { runWeeklyResolution } from "@/app/domains/resolution/service/weekly-resolution";
 
 const cronHeadersSchema = z.object({
   authorization: z.string().regex(/^Bearer\s+\S+$/).optional(),
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const result = await runWeeklyResolutionStub(new Date());
+  const result = await runWeeklyResolution(new Date());
 
   return NextResponse.json(result, { status: 200 });
 }
