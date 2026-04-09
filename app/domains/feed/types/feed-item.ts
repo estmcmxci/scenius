@@ -30,6 +30,9 @@ export type FeedItem = {
   snapshotLikes: number | null;
   snapshotReposts: number | null;
   snapshotFollowers: number | null;
+
+  // EAS attestation
+  easAttestationUid: string | null;
 };
 
 export type FeedFilter = "pending" | "resolved" | "all";

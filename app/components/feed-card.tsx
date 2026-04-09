@@ -68,6 +68,11 @@ export function FeedCard({ item }: Props) {
             {item.createdAt && (
               <span>{new Date(item.createdAt).toLocaleDateString()}</span>
             )}
+            {item.easAttestationUid && (
+              <span className="text-blue-600 hover:text-blue-800 underline">
+                Attested on EAS
+              </span>
+            )}
           </div>
         </div>
 
