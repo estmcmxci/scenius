@@ -48,6 +48,11 @@ async function main() {
       await feedCommand(args[0]);
       break;
     }
+    case "reputation-test": {
+      const { reputationTestCommand } = await import("./reputation-test");
+      reputationTestCommand();
+      break;
+    }
     case "predict": {
       if (!args[0]) {
         console.error(
@@ -61,7 +66,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: feed, predict, prediction, preview, resolve, seed, snapshot, tastemaker");
+      console.error("Available commands: feed, predict, prediction, preview, reputation-test, resolve, seed, snapshot, tastemaker");
       process.exit(1);
   }
 }
