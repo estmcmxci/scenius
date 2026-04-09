@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, or, isNull } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { getEnv } from "@/app/config/env";
 import { listDuePendingPredictions } from "@/app/domains/resolution/repo/due-predictions";
@@ -125,7 +125,7 @@ async function resolveSingle(
         predictedYes: predictedOutcome === "yes",
         outcomeYes: actualOutcome === "yes",
         streamThreshold: pred.streamThreshold,
-        scDelta: BigInt(delta),
+        scDelta: BigInt(Math.max(0, delta)),
       });
 
       await db
@@ -226,6 +226,70 @@ export async function runWeeklyResolution(now: Date): Promise<ResolutionResult> 
     skipped: result.skipped,
     errors: result.errors,
   }));
+
+  return result;
+}
+
+export async function retryUnattested(): Promise<{ retried: number; succeeded: number; failed: number }> {
+  const unattested = await db
+    .select({
+      id: predictions.id,
+      predictedOutcome: predictions.predictedOutcome,
+      outcome: predictions.outcome,
+      streamThreshold: predictions.streamThreshold,
+      snapshotId: predictions.snapshotId,
+      resolutionSnapshotId: predictions.resolutionSnapshotId,
+      tastemakerId: predictions.tastemakerId,
+    })
+    .from(predictions)
+    .where(
+      and(
+        or(eq(predictions.outcome, "yes"), eq(predictions.outcome, "no")),
+        isNull(predictions.easAttestationUid)
+      )
+    );
+
+  const result = { retried: unattested.length, succeeded: 0, failed: 0 };
+
+  for (const pred of unattested) {
+    const info = await getTastemakerInfo(pred.tastemakerId);
+    if (!info.walletAddress) {
+      result.failed++;
+      continue;
+    }
+
+    const creationPlays = await getCreationPlays(pred.snapshotId);
+    let delta = 0;
+    if (creationPlays !== null && pred.resolutionSnapshotId) {
+      const resRows = await db
+        .select({ totalPlays: catalogSnapshots.totalPlays })
+        .from(catalogSnapshots)
+        .where(eq(catalogSnapshots.id, pred.resolutionSnapshotId))
+        .limit(1);
+      const resPlays = resRows[0]?.totalPlays ?? BigInt(0);
+      delta = Math.max(0, Number(resPlays) - Number(creationPlays));
+    }
+
+    try {
+      const uid = await attestPredictionOutcome({
+        predictionId: pred.id,
+        tastemakerAddress: info.walletAddress,
+        predictedYes: pred.predictedOutcome === "yes",
+        outcomeYes: pred.outcome === "yes",
+        streamThreshold: pred.streamThreshold,
+        scDelta: BigInt(delta),
+      });
+
+      await db
+        .update(predictions)
+        .set({ easAttestationUid: uid })
+        .where(eq(predictions.id, pred.id));
+
+      result.succeeded++;
+    } catch {
+      result.failed++;
+    }
+  }
 
   return result;
 }
