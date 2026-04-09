@@ -18,10 +18,12 @@ const cronEnvSchema = z.object({
   CRON_SECRET: z.string().min(1),
 });
 
+const hexString = z.string().regex(/^0x[0-9a-fA-F]+$/, "Must be a 0x-prefixed hex string");
+
 const easEnvSchema = z.object({
-  EAS_PRIVATE_KEY: z.string().min(1),
-  EAS_SCHEMA_UID_PREDICTION: z.string().min(1),
-  EAS_SCHEMA_UID_REPUTATION: z.string().min(1),
+  EAS_PRIVATE_KEY: hexString,
+  EAS_SCHEMA_UID_PREDICTION: hexString,
+  EAS_SCHEMA_UID_REPUTATION: hexString,
 });
 
 export type Env = z.infer<typeof envSchema>;
