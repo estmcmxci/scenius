@@ -118,17 +118,21 @@ export async function seedCommand(): Promise<void> {
       continue;
     }
 
+    const trackId = trackIds[p.trackIndex];
+    const whereConditions = [
+      eq(predictions.tastemakerId, tastemakerId),
+      eq(predictions.artistId, artistId),
+      eq(predictions.streamThreshold, BigInt(p.streamThreshold)),
+      eq(predictions.horizon, p.horizon),
+    ];
+    if (trackId) {
+      whereConditions.push(eq(predictions.trackId, trackId));
+    }
+
     const existing = await db
       .select({ id: predictions.id })
       .from(predictions)
-      .where(
-        and(
-          eq(predictions.tastemakerId, tastemakerId),
-          eq(predictions.artistId, artistId),
-          eq(predictions.streamThreshold, BigInt(p.streamThreshold)),
-          eq(predictions.horizon, p.horizon),
-        )
-      )
+      .where(and(...whereConditions))
       .limit(1);
 
     if (existing.length > 0) {

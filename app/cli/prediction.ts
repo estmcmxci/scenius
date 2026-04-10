@@ -39,7 +39,7 @@ export async function predictionCommand(id?: string): Promise<void> {
       .from(trackSnapshots)
       .where(eq(trackSnapshots.id, prediction.trackSnapshotId))
       .limit(1);
-    trackPlays = tsRow?.playbackCount ? Number(tsRow.playbackCount) : null;
+    trackPlays = tsRow?.playbackCount != null ? Number(tsRow.playbackCount) : null;
   }
 
   const label = trackTitle
