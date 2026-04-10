@@ -6,9 +6,9 @@ import { resolveEnsName } from "@/app/shared/ens";
 import { formatAddress } from "@/app/shared/format-address";
 
 const OUTCOME_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  yes: "bg-green-100 text-green-800",
-  no: "bg-red-100 text-red-800",
+  pending: "bg-outcome-pending-bg text-outcome-pending-fg",
+  yes: "bg-outcome-yes-bg text-outcome-yes-fg",
+  no: "bg-outcome-no-bg text-outcome-no-fg",
 };
 
 const HORIZON_LABELS: Record<string, string> = {
@@ -42,8 +42,8 @@ export default async function PredictionPage({ params }: Props) {
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       {/* Back link */}
-      <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-        ← Back to feed
+      <Link href="/" className="text-sm text-fg-faint hover:text-fg-muted transition-colors">
+        &larr; Back to feed
       </Link>
 
       {/* Prediction header */}
@@ -53,31 +53,31 @@ export default async function PredictionPage({ params }: Props) {
             <img
               src={(track?.artworkUrl ?? artist.avatarUrl)!}
               alt=""
-              className={`h-12 w-12 object-cover ${track ? "rounded" : "rounded-full"}`}
+              className={`h-14 w-14 object-cover ${track ? "rounded" : "rounded-full"}`}
             />
           )}
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="font-serif text-2xl font-bold text-fg">
               {track ? track.title : artist.username}
             </h1>
             {track ? (
-              <p className="text-sm text-gray-500">{artist.username}</p>
+              <p className="text-sm text-fg-muted">{artist.username}</p>
             ) : (
               artist.city && (
-                <p className="text-sm text-gray-500">{artist.city}</p>
+                <p className="text-sm text-fg-muted">{artist.city}</p>
               )
             )}
           </div>
         </div>
 
-        <p className="text-lg text-gray-700">
-          <span className="font-medium">{displayName}</span>
+        <p className="text-lg text-fg-muted leading-relaxed">
+          <span className="font-medium text-fg">{displayName}</span>
           {" predicts "}
-          <span className="font-semibold">
+          <span className="font-semibold text-fg">
             {prediction.predictedOutcome === "yes" ? "will" : "will not"}
           </span>
           {" hit "}
-          <span className="font-bold text-gray-900">
+          <span className="font-bold text-accent">
             {Number(prediction.streamThreshold).toLocaleString()}
           </span>
           {" streams in "}
@@ -93,102 +93,102 @@ export default async function PredictionPage({ params }: Props) {
 
       {/* Snapshot at prediction time */}
       <section className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-semibold text-fg-faint uppercase tracking-widest mb-3">
           {trackSnapshot ? "Track at prediction time" : "Catalog at prediction time"}
         </h2>
         {trackSnapshot ? (
-          <div className="grid grid-cols-3 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-bg-raised p-4">
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(trackSnapshot.playbackCount ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">plays</p>
+              <p className="text-xs text-fg-faint">plays</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(trackSnapshot.likesCount ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">likes</p>
+              <p className="text-xs text-fg-faint">likes</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(trackSnapshot.repostsCount ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">reposts</p>
+              <p className="text-xs text-fg-faint">reposts</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-bg-raised p-4">
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(snapshot.totalPlays ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">plays</p>
+              <p className="text-xs text-fg-faint">plays</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(snapshot.followersCount ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">followers</p>
+              <p className="text-xs text-fg-faint">followers</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(snapshot.totalLikes ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">likes</p>
+              <p className="text-xs text-fg-faint">likes</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-gray-900">
+              <p className="text-xl font-bold text-fg">
                 {Number(snapshot.totalReposts ?? 0).toLocaleString()}
               </p>
-              <p className="text-xs text-gray-500">reposts</p>
+              <p className="text-xs text-fg-faint">reposts</p>
             </div>
           </div>
         )}
-        <p className="mt-2 text-xs text-gray-400">
+        <p className="mt-2 text-xs text-fg-faint">
           Data via{" "}
           {(track?.permalinkUrl ?? artist.permalinkUrl) ? (
             <a
               href={(track?.permalinkUrl ?? artist.permalinkUrl)!}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline"
+              className="underline hover:text-fg-muted"
             >
               SoundCloud
             </a>
           ) : (
             "SoundCloud"
           )}
-          {" · snapshotted "}
+          {" \u00b7 snapshotted "}
           {(trackSnapshot?.takenAt ?? snapshot.takenAt).toLocaleDateString()}
         </p>
       </section>
 
       {/* Tastemaker */}
       <section className="mb-8">
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+        <h2 className="text-xs font-semibold text-fg-faint uppercase tracking-widest mb-3">
           Tastemaker
         </h2>
         <Link
           href={`/tastemakers/${tastemaker.id}`}
-          className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-400 transition-colors"
+          className="flex items-center gap-3 rounded-lg border border-border bg-bg-raised p-4 transition-all hover:border-border-hover hover:bg-bg-elevated"
         >
           <div>
-            <p className="font-medium text-gray-900">{displayName}</p>
+            <p className="font-medium text-fg">{displayName}</p>
             {tastemaker.walletAddress && (
-              <p className="text-xs text-gray-400 font-mono">
+              <p className="text-xs text-fg-faint font-mono">
                 {formatAddress(tastemaker.walletAddress)}
               </p>
             )}
-            <p className="text-sm text-gray-500">
-              Reputation: {tastemaker.reputationScore?.toFixed(3) ?? "—"}
+            <p className="text-sm text-fg-muted">
+              Reputation: {tastemaker.reputationScore?.toFixed(3) ?? "\u2014"}
             </p>
           </div>
         </Link>
       </section>
 
       {/* Metadata */}
-      <section className="text-xs text-gray-400">
+      <section className="text-xs text-fg-faint">
         {prediction.createdAt && (
           <p>Created: {new Date(prediction.createdAt).toLocaleDateString()}</p>
         )}
@@ -202,7 +202,7 @@ export default async function PredictionPage({ params }: Props) {
               href={getAttestationUrl(prediction.easAttestationUid)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-800 underline"
+              className="text-accent hover:text-accent-muted underline"
             >
               View on EAS
             </a>

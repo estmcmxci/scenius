@@ -7,19 +7,21 @@ export default async function ResolvedPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">Resolved</h1>
-        <p className="mt-2 text-base text-gray-600">
+        <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
+          Resolved
+        </h1>
+        <p className="mt-2 text-base text-fg-muted leading-relaxed">
           Predictions that have been resolved against real SoundCloud data
         </p>
       </header>
 
       {items.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-fg-faint">
           No resolved predictions yet. Predictions resolve automatically when
           their time horizon expires.
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {items.map((item) => (
             <li key={item.predictionId}>
               <FeedCard item={item} />

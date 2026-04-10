@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { PredictionWithArtist } from "@/app/domains/tastemakers/repo/tastemaker-repo";
 
 const OUTCOME_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  yes: "bg-green-100 text-green-800",
-  no: "bg-red-100 text-red-800",
+  pending: "bg-outcome-pending-bg text-outcome-pending-fg",
+  yes: "bg-outcome-yes-bg text-outcome-yes-fg",
+  no: "bg-outcome-no-bg text-outcome-no-fg",
 };
 
 const HORIZON_LABELS: Record<string, string> = {
@@ -28,26 +28,26 @@ export function PredictionCard({ item }: Props) {
   return (
     <Link
       href={`/predictions/${prediction.id}`}
-      className="block rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-400 transition-colors"
+      className="group block rounded-lg border border-border bg-bg-raised p-4 transition-all hover:border-border-hover hover:bg-bg-elevated"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
+          <p className="font-serif text-sm font-medium text-fg truncate">
             {track ? `${track.title} by ${artist.username}` : artist.username}
           </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-fg-muted">
             Predicts{" "}
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-fg">
               {prediction.predictedOutcome === "yes" ? "will" : "will not"}
             </span>{" "}
             hit{" "}
-            <span className="font-medium text-gray-800">
+            <span className="font-medium text-accent">
               {Number(prediction.streamThreshold).toLocaleString()}
             </span>{" "}
             streams in {horizonLabel}
           </p>
           {prediction.createdAt && (
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-fg-faint">
               {new Date(prediction.createdAt).toLocaleDateString()}
             </p>
           )}

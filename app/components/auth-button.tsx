@@ -16,7 +16,7 @@ export function AuthButton() {
     return (
       <button
         onClick={() => openModal()}
-        className="rounded-md bg-gray-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+        className="rounded-md bg-fg px-3.5 py-1.5 text-sm font-medium text-bg transition-colors hover:bg-fg-muted"
       >
         Sign In
       </button>
@@ -36,10 +36,10 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm font-mono text-gray-600">{displayAddress}</span>
+      <span className="text-sm font-mono text-fg-muted">{displayAddress}</span>
       <button
         onClick={handleSignOut}
-        className="rounded-md border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+        className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg-muted transition-colors hover:border-border-hover hover:text-fg"
       >
         Sign Out
       </button>

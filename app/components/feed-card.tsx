@@ -3,9 +3,9 @@ import type { FeedItem } from "@/app/domains/feed/types/feed-item";
 import { formatAddress } from "@/app/shared/format-address";
 
 const OUTCOME_STYLES: Record<string, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  yes: "bg-green-100 text-green-800",
-  no: "bg-red-100 text-red-800",
+  pending: "bg-outcome-pending-bg text-outcome-pending-fg",
+  yes: "bg-outcome-yes-bg text-outcome-yes-fg",
+  no: "bg-outcome-no-bg text-outcome-no-fg",
 };
 
 const HORIZON_LABELS: Record<string, string> = {
@@ -27,32 +27,32 @@ export function FeedCard({ item }: Props) {
   return (
     <Link
       href={`/predictions/${item.predictionId}`}
-      className="block rounded-lg border border-gray-200 bg-white p-5 hover:border-gray-400 transition-colors"
+      className="group block rounded-lg border border-border bg-bg-raised p-5 transition-all hover:border-border-hover hover:bg-bg-elevated"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {(item.trackArtworkUrl ?? item.artistAvatarUrl) && (
               <img
                 src={(item.trackArtworkUrl ?? item.artistAvatarUrl)!}
                 alt=""
-                className="h-8 w-8 rounded-full object-cover"
+                className="h-10 w-10 rounded object-cover"
               />
             )}
             <div className="min-w-0">
-              <p className="text-base font-semibold text-gray-900 truncate">
+              <p className="font-serif text-base font-semibold text-fg truncate">
                 {item.trackName ?? item.artistName}
               </p>
               {item.trackName && (
-                <p className="text-xs text-gray-500 truncate">
+                <p className="text-xs text-fg-muted truncate">
                   {item.artistName}
                 </p>
               )}
             </div>
           </div>
 
-          <p className="mt-2 text-sm text-gray-700">
-            <span className="font-medium">
+          <p className="mt-3 text-sm text-fg-muted leading-relaxed">
+            <span className="font-medium text-fg">
               {item.tastemakerEnsName
                 ?? item.tastemakerName
                 ?? (item.tastemakerWalletAddress
@@ -60,22 +60,22 @@ export function FeedCard({ item }: Props) {
                   : "Anonymous")}
             </span>
             {" predicts "}
-            <span className="font-medium">
+            <span className="font-medium text-fg">
               {item.predictedOutcome === "yes" ? "will" : "will not"}
             </span>
             {" hit "}
-            <span className="font-semibold text-gray-900">
+            <span className="font-semibold text-accent">
               {item.streamThreshold.toLocaleString()}
             </span>
             {" streams in "}
             {horizonLabel}
           </p>
 
-          <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+          <div className="mt-3 flex items-center gap-4 text-xs text-fg-faint">
             {item.snapshotPlays !== null && (
               <span>
                 {item.snapshotPlays.toLocaleString()} plays at prediction
-                <span className="ml-1 text-gray-400">via SoundCloud</span>
+                <span className="ml-1 text-fg-faint">via SoundCloud</span>
               </span>
             )}
             <span>rep: {item.reputationScore.toFixed(2)}</span>
@@ -83,7 +83,7 @@ export function FeedCard({ item }: Props) {
               <span>{new Date(item.createdAt).toLocaleDateString()}</span>
             )}
             {item.easAttestationUid && (
-              <span className="text-blue-600 hover:text-blue-800 underline">
+              <span className="text-accent hover:text-accent-muted underline">
                 Attested on EAS
               </span>
             )}

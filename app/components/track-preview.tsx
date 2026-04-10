@@ -103,17 +103,17 @@ export function TrackPreview({ url }: Props) {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-5 animate-pulse">
+      <div className="rounded-lg border border-border bg-bg-raised p-5 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded bg-gray-200" />
+          <div className="h-12 w-12 rounded bg-bg-elevated" />
           <div className="space-y-2">
-            <div className="h-4 w-40 rounded bg-gray-200" />
-            <div className="h-3 w-24 rounded bg-gray-200" />
+            <div className="h-4 w-40 rounded bg-bg-elevated" />
+            <div className="h-3 w-24 rounded bg-bg-elevated" />
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 rounded bg-gray-100" />
+            <div key={i} className="h-10 rounded bg-bg-elevated" />
           ))}
         </div>
       </div>
@@ -122,7 +122,7 @@ export function TrackPreview({ url }: Props) {
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+      <div className="rounded-lg border border-error-border bg-error-bg p-4 text-sm text-error-fg">
         {error}
       </div>
     );
@@ -131,7 +131,7 @@ export function TrackPreview({ url }: Props) {
   if (trackData) {
     const { artist, track, trackSnapshot } = trackData;
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <div className="rounded-lg border border-border bg-bg-raised p-5">
         <div className="flex items-center gap-3">
           {track.artworkUrl && (
             <img
@@ -141,10 +141,10 @@ export function TrackPreview({ url }: Props) {
             />
           )}
           <div>
-            <p className="text-base font-semibold text-gray-900">
+            <p className="font-serif text-base font-semibold text-fg">
               {track.title}
             </p>
-            <p className="text-sm text-gray-500">{artist.username}</p>
+            <p className="text-sm text-fg-muted">{artist.username}</p>
           </div>
         </div>
 
@@ -154,13 +154,13 @@ export function TrackPreview({ url }: Props) {
           <Stat label="Reposts" value={trackSnapshot.repostsCount} />
         </div>
 
-        <p className="mt-4 text-xs text-gray-400">
+        <p className="mt-4 text-xs text-fg-faint">
           Data from{" "}
           <a
             href={track.permalinkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-gray-600"
+            className="underline hover:text-fg-muted"
           >
             {track.title} by {artist.username} on SoundCloud
           </a>
@@ -172,7 +172,7 @@ export function TrackPreview({ url }: Props) {
   if (artistData) {
     const { artist, totals } = artistData;
     return (
-      <div className="rounded-lg border border-gray-200 bg-white p-5">
+      <div className="rounded-lg border border-border bg-bg-raised p-5">
         <div className="flex items-center gap-3">
           {artist.avatarUrl && (
             <img
@@ -182,7 +182,7 @@ export function TrackPreview({ url }: Props) {
             />
           )}
           <div>
-            <p className="text-base font-semibold text-gray-900">
+            <p className="font-serif text-base font-semibold text-fg">
               {artist.username}
             </p>
           </div>
@@ -194,13 +194,13 @@ export function TrackPreview({ url }: Props) {
           <Stat label="Reposts" value={totals.reposts} />
         </div>
 
-        <p className="mt-4 text-xs text-gray-400">
+        <p className="mt-4 text-xs text-fg-faint">
           Data from{" "}
           <a
             href={artist.permalinkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-gray-600"
+            className="underline hover:text-fg-muted"
           >
             {artist.username} on SoundCloud
           </a>
@@ -214,11 +214,11 @@ export function TrackPreview({ url }: Props) {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md bg-gray-50 px-3 py-2">
-      <p className="text-lg font-semibold text-gray-900">
+    <div className="rounded-md bg-bg-elevated px-3 py-2">
+      <p className="text-lg font-semibold text-fg">
         {value.toLocaleString()}
       </p>
-      <p className="text-xs text-gray-500">{label}</p>
+      <p className="text-xs text-fg-muted">{label}</p>
     </div>
   );
 }

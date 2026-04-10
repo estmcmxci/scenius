@@ -93,16 +93,16 @@ export default function SubmitPage() {
     return (
       <main className="mx-auto max-w-2xl px-4 py-12">
         <header className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
             Submit a Prediction
           </h1>
-          <p className="mt-2 text-base text-gray-600">
+          <p className="mt-2 text-base text-fg-muted leading-relaxed">
             Sign in to submit a prediction on an independent artist.
           </p>
         </header>
         <button
           onClick={() => openModal()}
-          className="rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+          className="rounded-md bg-fg px-4 py-3 text-sm font-medium text-bg transition-colors hover:bg-fg-muted"
         >
           Sign In to Submit
         </button>
@@ -113,19 +113,19 @@ export default function SubmitPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
           Submit a Prediction
         </h1>
-        <p className="mt-2 text-base text-gray-600">
+        <p className="mt-2 text-base text-fg-muted leading-relaxed">
           Predict whether an independent artist will hit a stream threshold
           within a given time horizon.
         </p>
       </header>
 
       {walletAddress && (
-        <div className="mb-8 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+        <div className="mb-8 rounded-md border border-border bg-bg-raised px-4 py-3 text-sm text-fg-muted">
           Predicting as:{" "}
-          <span className="font-mono font-medium">
+          <span className="font-mono font-medium text-fg">
             {formatAddress(walletAddress)}
           </span>
         </div>
@@ -214,7 +214,7 @@ export default function SubmitPage() {
 
         {/* Form-level error */}
         {formError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="rounded-lg border border-error-border bg-error-bg p-4 text-sm text-error-fg">
             {formError}
           </div>
         )}
@@ -223,7 +223,7 @@ export default function SubmitPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-400"
+          className="w-full rounded-md bg-fg px-4 py-3 text-sm font-medium text-bg transition-colors hover:bg-fg-muted disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Submitting..." : "Submit Prediction"}
         </button>
@@ -247,16 +247,16 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-900">
+      <label className="block text-sm font-medium text-fg">
         {label}
       </label>
       {hint && (
-        <p className="mt-1 text-xs text-gray-500">{hint}</p>
+        <p className="mt-1 text-xs text-fg-faint">{hint}</p>
       )}
       <div className="mt-2">{children}</div>
       {error &&
         error.map((msg) => (
-          <p key={msg} className="mt-1 text-xs text-red-600">
+          <p key={msg} className="mt-1 text-xs text-error-fg">
             {msg}
           </p>
         ))}
@@ -266,16 +266,16 @@ function Field({
 
 function inputClass(error?: string[]): string {
   const base =
-    "w-full rounded-md border px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900";
+    "w-full rounded-md border bg-bg-raised px-3 py-2 text-sm text-fg placeholder-fg-faint focus:outline-none focus:ring-2 focus:ring-accent";
   return error && error.length > 0
-    ? `${base} border-red-300 focus:ring-red-500`
-    : `${base} border-gray-300`;
+    ? `${base} border-error-border focus:ring-error-fg`
+    : `${base} border-border`;
 }
 
 function toggleClass(active: boolean): string {
   const base =
     "rounded-md px-4 py-2 text-sm font-medium transition-colors";
   return active
-    ? `${base} bg-gray-900 text-white`
-    : `${base} bg-gray-100 text-gray-600 hover:bg-gray-200`;
+    ? `${base} bg-fg text-bg`
+    : `${base} bg-bg-elevated text-fg-muted hover:text-fg hover:bg-bg-raised`;
 }
