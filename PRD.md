@@ -90,7 +90,7 @@ Component architecture must support V2 from day one — no hardcoded layouts.
 | Framework | Next.js 15 (App Router) | Fast, SEO-friendly, Vercel-native |
 | Styling | Tailwind CSS + CSS variables | Speed + per-artist zine theming in V2 |
 | Auth + Wallet | Para | Passkey auth, no seed phrases |
-| Reputation Graph | Memory Protocol | User-owned, portable, monetizable via $MEM |
+| Reputation Graph | EAS (onchain attestations) | Portable, verifiable, immutable reputation via attestations |
 | Market Data | SoundCloud API | Real engagement metrics as prediction anchor |
 | Database | Supabase (Postgres) | Metric snapshots, predictions, resolution history |
 | Deployment | Vercel | Zero config, existing domain |
@@ -163,7 +163,7 @@ id               uuid
 name             string
 ens_name         string
 bio              text
-memory_protocol_id  string    -- portable reputation identifier
+memory_protocol_id  string    -- nullable stub (deprecated, EAS replaces)
 reputation_score float        -- EMA proper scoring rule (see Reputation Scoring section)
 created_at       timestamp
 ```
@@ -246,7 +246,7 @@ outcome = YES if delta >= stream_threshold else NO
 
 ### 3. Tastemaker Profiles
 - Public profile: name, ENS name, bio, prediction history, accuracy score
-- Memory Protocol ID linked (portable reputation)
+- EAS attestation history linked (portable, onchain reputation)
 - Seeded with 3–5 real tastemakers with verifiable track records
 
 ### 4. Prediction Submission
@@ -268,7 +268,7 @@ outcome = YES if delta >= stream_threshold else NO
 - On-chain staking / token mechanics
 - Real money / financial settlement
 - Financial settlement contracts (V2 — introduced with capital staking)
-- Note: EAS, Memory Protocol, and Para smart accounts ARE in scope. Contracts are present but abstracted. Trust layer = onchain attestations, not financial custody.
+- Note: EAS and Para smart accounts ARE in scope. Contracts are present but abstracted. Trust layer = onchain attestations, not financial custody.
 - Full editorial CMS / workflow
 - Mobile app
 - Zine layout layer (V2)
@@ -287,7 +287,7 @@ outcome = YES if delta >= stream_threshold else NO
 | M4 — Feed + Profiles | Apr 4 | Seeded data, discovery feed live |
 | M5 — Prediction Flow | Apr 11 | Submission + binary prediction + shareable URL |
 | M6 — EAS Integration | Apr 18 | Attestations writing on resolution |
-| M7 — Memory Protocol + Para | May 2 | Portable reputation + passkey auth |
+| M7 — Para Auth + ENS | May 2 | Passkey auth + ENS tastemaker names |
 | M8 — Real predictions live | May 16 | 3–5 seeded tastemakers, real artists, real predictions |
 | M9 — Polish | May 30 | Design pass, edge cases, mobile-readable |
 | M10 — Demo ready | Jun 6 | Stress test, demo script, one resolved prediction onchain |
@@ -310,7 +310,7 @@ outcome = YES if delta >= stream_threshold else NO
 
 1. Which 3–5 artists seed the initial catalog list? (SoundCloud-native, pre-breakout preferred)
 2. Who are the seeded tastemakers? Real people with verifiable track records?
-3. Memory Protocol API access — apply now or stub for MVP?
+3. ~~Memory Protocol~~ — resolved: dropped. EAS attestations handle portable reputation.
 4. Para — apply for early access or use email auth as fallback?
 5. ~~Resolution mechanism~~ — resolved: automated via SoundCloud delta cron, EAS attestation on resolution.
 6. ~~Catalog valuation unit~~ — resolved: binary YES/NO on stream threshold.
@@ -325,7 +325,7 @@ The music industry has never had a credible forward-looking price signal for ind
 
 The business model is not speculation. Every prediction is a data point. Every resolved prediction is training data for a catalog pricing model that doesn't exist anywhere else. The dataset compounds with every Friday drop cycle. Over time, Scenius becomes the Bloomberg terminal for independent music — and the tastemakers who built it own their contribution to it.
 
-The primitives are best-in-class: SoundCloud as the data anchor, Memory Protocol for portable reputation, Para for frictionless identity, EAS for trust. But the product is cultural. That's the moat.
+The primitives are best-in-class: SoundCloud as the data anchor, EAS for portable onchain reputation, Para for frictionless identity. But the product is cultural. That's the moat.
 
 ---
 

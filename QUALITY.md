@@ -22,7 +22,7 @@ Grades: A (solid) / B (minor debt) / C (needs work) / D (known holes) / — (not
 | Supabase schema | C | 5 tables via Drizzle migrations. IPv4 pooler configured (SCE-5). |
 | Vercel Cron | D | Resolve stub in vercel.json (Fridays noon UTC). Snapshot cron not yet wired. |
 | EAS integration | — | Not started |
-| Memory Protocol | — | Not started |
+| Memory Protocol | — | Dropped (EAS replaces) |
 | Para auth | — | Not started |
 | CI / linting | — | Not started |
 | .gitignore | ✓ | Done |

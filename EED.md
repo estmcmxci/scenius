@@ -60,7 +60,7 @@ Hybrid: offchain computation + onchain attestations via EAS.
 ├──────────────────────────────────────────┤
 │  External                                │
 │  - SoundCloud API (data anchor)          │
-│  - Memory Protocol (portable reputation) │
+│  - EAS (portable reputation attestations) │
 │  - Para (passkey auth + wallet)          │
 └──────────────────────────────────────────┘
 ```
@@ -82,7 +82,7 @@ The hybrid approach:
 | Framework | Next.js 15 (App Router) | API routes + SSR + Vercel deploy in one |
 | Styling | Tailwind CSS + CSS variables | Speed + per-artist zine theming in V2 |
 | Auth + Wallet | Para | Passkey auth, no seed phrases, low friction onboarding |
-| Reputation Graph | Memory Protocol | User-owned, portable, monetizable via $MEM |
+| Reputation Graph | EAS (onchain attestations) | Portable, verifiable, immutable reputation via attestations |
 | Market Data | SoundCloud API (client credentials) | Real engagement metrics as prediction anchor |
 | Database | Supabase (Postgres) + Drizzle ORM | Type-safe, zero-config, Supabase free tier for MVP |
 | Deployment | Vercel | Zero config, existing domain |
@@ -101,7 +101,7 @@ The hybrid approach:
 | Onchain primitive | EAS attestations | Gnosis CTF (too complex for MVP), Sign Protocol (token dependency), Verax (over-engineered) |
 | Resolution | Automated SoundCloud delta cron | Manual admin (trust required), UMA Optimistic Oracle (production V2) |
 | Reputation storage | Supabase + periodic EAS snapshots | Full onchain (gas-heavy for frequent updates) |
-| Identity | Memory Protocol | ENS-only (no portability layer), custom DB (not portable) |
+| Identity | Para + ENS | ENS-only (no portability layer), custom DB (not portable) |
 | No artist-dedicated pages | Prediction-first routing | Direct artist pages violate SoundCloud ToS |
 
 ---
@@ -138,7 +138,7 @@ CREATE TABLE tastemakers (
   name                 TEXT,
   ens_name             TEXT,
   bio                  TEXT,
-  memory_protocol_id   TEXT,
+  memory_protocol_id   TEXT,              -- nullable stub (deprecated, EAS replaces)
   reputation_score     FLOAT DEFAULT 1.0,  -- EMA proper scoring rule, init at 1.0
   created_at           TIMESTAMP DEFAULT NOW()
 );
@@ -303,7 +303,7 @@ pages. Artist is always context inside `/predictions/[id]`.
 - Modular component structure (ready for V2 zine upgrade)
 
 ### Tastemaker Profile (`/tastemakers/[id]`)
-- Name, ENS name, bio, Memory Protocol ID
+- Name, ENS name, bio
 - Reputation score (prominent) + prediction history
 - Accuracy over time
 - EAS attestation links per resolved prediction
@@ -349,7 +349,7 @@ POST   /api/cron/resolve             → Friday resolution job (Vercel Cron)
 | M4 | Apr 4 | Discovery feed + tastemaker profiles + seeded data live |
 | M5 | Apr 11 | Prediction submission flow + binary prediction + shareable URL |
 | M6 | Apr 18 | EAS attestations writing on resolution |
-| M7 | May 2 | Memory Protocol + Para auth integrated |
+| M7 | May 2 | Para auth + ENS integrated |
 | M8 | May 16 | 3–5 real tastemakers, real artists, real live predictions |
 | M9 | May 30 | Design polish, attribution components, privacy policy, mobile-readable |
 | M10 | Jun 6 | Stress test, demo script, one resolved prediction onchain |
@@ -364,7 +364,7 @@ POST   /api/cron/resolve             → Friday resolution job (Vercel Cron)
 | SC API rate limits under load | Low | Medium | Cache snapshots in Supabase; only pull on prediction creation and Friday cron |
 | EAS SDK issues | Low | High | EAS is battle-tested; fallback to offchain-only attestations for MVP |
 | Para early access delayed | Medium | Medium | Email auth as fallback for M5; swap Para in at M7 |
-| Memory Protocol API access delayed | Medium | Low | Stub memory_protocol_id in tastemakers table; integrate at M7 |
+| ~~Memory Protocol~~ | — | — | Dropped — EAS attestations handle portable reputation |
 | DB schema changes mid-build | Medium | Low | Drizzle migrations are fast; keep schema minimal and iterate |
 | Reputation math produces degenerate values | Low | High | Clamp reputation to [0.01, 0.99]; use exact parameters from paper |
 | SC ToS artist-page violation | Mitigated | High | Prediction-first routing enforced — no `/artists/[id]` route exists |
