@@ -22,53 +22,55 @@ export default async function TastemakerProfilePage({ params }: Props) {
     : null;
   const displayName =
     ensName ?? tastemaker.displayName ?? tastemaker.walletAddress ?? "Anonymous";
-  const reputation = tastemaker.reputationScore?.toFixed(3) ?? "—";
+  const reputation = tastemaker.reputationScore?.toFixed(3) ?? "\u2014";
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       {/* Profile header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{displayName}</h1>
+        <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
+          {displayName}
+        </h1>
         {tastemaker.walletAddress && (
-          <p className="mt-1 text-sm text-gray-500 font-mono">
+          <p className="mt-1 text-sm text-fg-faint font-mono">
             {formatAddress(tastemaker.walletAddress)}
           </p>
         )}
-        <p className="mt-3 text-lg text-gray-600">
+        <p className="mt-3 text-lg text-fg-muted">
           Reputation score:{" "}
-          <span className="font-semibold text-gray-900">{reputation}</span>
+          <span className="font-semibold text-accent">{reputation}</span>
         </p>
       </div>
 
       {/* Stats */}
-      <div className="mb-8 grid grid-cols-3 gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div className="mb-8 grid grid-cols-3 gap-4 rounded-lg border border-border bg-bg-raised p-4">
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl font-bold text-fg">
             {stats.totalPredictions}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">Total predictions</p>
+          <p className="text-xs text-fg-faint mt-0.5">Total predictions</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl font-bold text-fg">
             {stats.resolvedPredictions}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">Resolved</p>
+          <p className="text-xs text-fg-faint mt-0.5">Resolved</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-gray-900">
-            {stats.winRate !== null ? `${stats.winRate}%` : "—"}
+          <p className="text-2xl font-bold text-fg">
+            {stats.winRate !== null ? `${stats.winRate}%` : "\u2014"}
           </p>
-          <p className="text-xs text-gray-500 mt-0.5">Win rate</p>
+          <p className="text-xs text-fg-faint mt-0.5">Win rate</p>
         </div>
       </div>
 
       {/* Predictions list */}
       <section>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+        <h2 className="mb-4 font-serif text-lg font-semibold text-fg">
           Predictions
         </h2>
         {predictions.length === 0 ? (
-          <p className="text-sm text-gray-500">No predictions yet.</p>
+          <p className="text-sm text-fg-faint">No predictions yet.</p>
         ) : (
           <ul className="space-y-3">
             {predictions.map((item) => (

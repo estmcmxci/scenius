@@ -7,21 +7,23 @@ export default async function Home() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       <header className="mb-10">
-        <h1 className="text-3xl font-bold text-gray-900">Scenius</h1>
-        <p className="mt-2 text-base text-gray-600">
+        <h1 className="font-serif text-4xl font-bold tracking-tight text-fg">
+          Scenius
+        </h1>
+        <p className="mt-2 text-base text-fg-muted leading-relaxed">
           Reputation-weighted predictions on independent music
         </p>
       </header>
 
       {items.length === 0 ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-fg-faint">
           No predictions yet. Seed the database with{" "}
-          <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs">
+          <code className="rounded bg-bg-elevated px-1.5 py-0.5 text-xs text-fg-muted">
             pnpm cli seed
           </code>
         </p>
       ) : (
-        <ul className="space-y-3">
+        <ul className="space-y-4">
           {items.map((item) => (
             <li key={item.predictionId}>
               <FeedCard item={item} />
