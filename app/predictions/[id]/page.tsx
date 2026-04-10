@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPredictionDetail } from "@/app/domains/predictions/service/prediction-service";
@@ -5,6 +7,38 @@ import { getAttestationUrl } from "@/app/config/eas";
 import { resolveEnsName } from "@/app/shared/ens";
 import { formatAddress } from "@/app/shared/format-address";
 import { ScAttribution } from "@/app/shared/components/sc-attribution";
+
+const getCachedDetail = cache((id: string) => getPredictionDetail(id));
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const detail = await getCachedDetail(id);
+  if (!detail) return { title: "Prediction Not Found" };
+
+  const { prediction, artist } = detail;
+  const trackName = detail.track?.title;
+  const label = trackName
+    ? `${trackName} by ${artist.username}`
+    : artist.username;
+  const threshold = Number(prediction.streamThreshold).toLocaleString();
+  const verb = prediction.predictedOutcome === "yes" ? "will" : "will not";
+  const description = `Prediction: ${verb} hit ${threshold} streams in ${prediction.horizon}`;
+
+  return {
+    title: `${label} | ${threshold} streams`,
+    description,
+    openGraph: {
+      title: `${label} | Scenius`,
+      description,
+      type: "article",
+    },
+    twitter: {
+      card: "summary",
+      title: `${label} | Scenius`,
+      description,
+    },
+  };
+}
 
 const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-outcome-pending-bg text-outcome-pending-fg",
@@ -25,7 +59,7 @@ type Props = {
 
 export default async function PredictionPage({ params }: Props) {
   const { id } = await params;
-  const detail = await getPredictionDetail(id);
+  const detail = await getCachedDetail(id);
 
   if (!detail) {
     notFound();
