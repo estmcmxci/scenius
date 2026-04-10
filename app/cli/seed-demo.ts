@@ -32,34 +32,32 @@ const SEED_TASTEMAKERS = [
   { displayName: "Pigeons & Planes", walletAddress: "0x2222222222222222222222222222222222222222" },
 ];
 
-const BACKDATED = new Date("2026-04-03T12:00:00Z");
-
 type PredictionSpec = {
   trackIndex: number;
   tastemakerIndex: number;
   streamThreshold: number;
   predictedOutcome: "yes" | "no";
   horizon: "1w" | "2w" | "4w" | "8w";
-  createdAt: Date;
 };
 
-/** Backdated predictions (due for immediate resolution) */
-const BACKDATED_PREDICTIONS: PredictionSpec[] = [
-  { trackIndex: 0, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w", createdAt: BACKDATED },
-  { trackIndex: 4, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w", createdAt: BACKDATED },
-  { trackIndex: 1, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w", createdAt: BACKDATED },
-  { trackIndex: 6, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "no", horizon: "1w", createdAt: BACKDATED },
+/**
+ * All predictions created with createdAt = now.
+ * Use `pnpm cli resolve --force` to resolve them immediately for the demo
+ * (skips horizon check). This avoids the backdating problem where creation
+ * snapshots taken today produce zero delta.
+ */
+const ALL_PREDICTIONS: PredictionSpec[] = [
+  // Expected YES — high velocity, likely to already exceed 10K
+  { trackIndex: 0, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w" },
+  { trackIndex: 1, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w" },
+  { trackIndex: 2, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w" },
+  { trackIndex: 3, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w" },
+  // Expected NO — low velocity, unlikely to exceed 10K
+  { trackIndex: 4, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w" },
+  { trackIndex: 5, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "no", horizon: "1w" },
+  { trackIndex: 6, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "no", horizon: "1w" },
+  { trackIndex: 7, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "no", horizon: "1w" },
 ];
-
-/** Pending predictions (recent, not yet due) */
-const PENDING_PREDICTIONS: PredictionSpec[] = [
-  { trackIndex: 2, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w", createdAt: new Date() },
-  { trackIndex: 3, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "yes", horizon: "1w", createdAt: new Date() },
-  { trackIndex: 5, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "no", horizon: "1w", createdAt: new Date() },
-  { trackIndex: 7, tastemakerIndex: 0, streamThreshold: 10000, predictedOutcome: "no", horizon: "1w", createdAt: new Date() },
-];
-
-const ALL_PREDICTIONS = [...BACKDATED_PREDICTIONS, ...PENDING_PREDICTIONS];
 
 async function upsertTastemaker(data: { displayName: string; walletAddress: string }): Promise<string> {
   const existing = await db
@@ -183,13 +181,11 @@ export async function seedDemoCommand(): Promise<void> {
         predictedOutcome: p.predictedOutcome,
         horizon: p.horizon,
         outcome: "pending",
-        createdAt: p.createdAt,
       })
       .returning({ id: predictions.id });
 
     predictionIds.push(inserted.id);
-    const label = p.createdAt === BACKDATED ? "backdated" : "pending";
-    console.log(`  ${p.predictedOutcome.toUpperCase()} ${p.streamThreshold.toLocaleString()} in ${p.horizon} [${label}] -> ${inserted.id}`);
+    console.log(`  ${p.predictedOutcome.toUpperCase()} ${p.streamThreshold.toLocaleString()} in ${p.horizon} -> ${inserted.id}`);
   }
 
   // 4. Create a post for the first prediction
@@ -218,7 +214,7 @@ export async function seedDemoCommand(): Promise<void> {
   console.log("\nSeed-demo complete:");
   console.log(`  ${trackData.filter(Boolean).length} tracks`);
   console.log(`  ${tastemakerIds.length} tastemakers`);
-  console.log(`  ${predictionIds.length} predictions (${BACKDATED_PREDICTIONS.length} backdated, ${PENDING_PREDICTIONS.length} pending)`);
+  console.log(`  ${predictionIds.length} predictions (use 'pnpm cli resolve --force' to resolve for demo)`);
   console.log(`  1 post`);
 
   process.exit(0);

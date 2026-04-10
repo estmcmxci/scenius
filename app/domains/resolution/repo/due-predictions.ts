@@ -22,6 +22,27 @@ export interface DuePrediction {
   trackSoundcloudId: bigint | null;
 }
 
+/** All pending predictions regardless of horizon — for demo/force resolution */
+export async function listAllPendingPredictions(): Promise<DuePrediction[]> {
+  return db
+    .select({
+      id: predictions.id,
+      tastemakerId: predictions.tastemakerId,
+      artistId: predictions.artistId,
+      snapshotId: predictions.snapshotId,
+      trackSnapshotId: predictions.trackSnapshotId,
+      streamThreshold: predictions.streamThreshold,
+      predictedOutcome: predictions.predictedOutcome,
+      permalinkUrl: artists.permalinkUrl,
+      trackPermalinkUrl: tracks.permalinkUrl,
+      trackSoundcloudId: tracks.soundcloudId,
+    })
+    .from(predictions)
+    .innerJoin(artists, eq(predictions.artistId, artists.id))
+    .leftJoin(tracks, eq(predictions.trackId, tracks.id))
+    .where(eq(predictions.outcome, "pending"));
+}
+
 export async function listDuePendingPredictions(now: Date): Promise<DuePrediction[]> {
   return db
     .select({
