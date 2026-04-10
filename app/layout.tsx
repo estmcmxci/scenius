@@ -5,8 +5,27 @@ import { ParaProvider } from "@/app/providers/para-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Scenius",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  ),
+  title: {
+    default: "Scenius",
+    template: "%s | Scenius",
+  },
   description: "Reputation-weighted prediction market for independent music",
+  openGraph: {
+    type: "website",
+    siteName: "Scenius",
+    title: "Scenius",
+    description:
+      "Reputation-weighted predictions on independent music. Attested onchain via EAS.",
+  },
+  twitter: {
+    card: "summary",
+    title: "Scenius",
+    description:
+      "Reputation-weighted predictions on independent music. Attested onchain via EAS.",
+  },
 };
 
 export default function RootLayout({

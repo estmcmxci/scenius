@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTastemakerProfile } from "@/app/domains/tastemakers/service/tastemaker-service";
 import { PredictionCard } from "@/app/components/prediction-card";
@@ -7,6 +8,32 @@ import { formatAddress } from "@/app/shared/format-address";
 type Props = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  const profile = await getTastemakerProfile(id);
+  if (!profile) return { title: "Tastemaker Not Found" };
+
+  const { tastemaker, stats } = profile;
+  const name = tastemaker.displayName ?? "Anonymous";
+  const reputation = tastemaker.reputationScore?.toFixed(3) ?? "N/A";
+  const description = `${name} — reputation ${reputation} | ${stats.totalPredictions} predictions, ${stats.winRate !== null ? `${stats.winRate}% win rate` : "no resolved predictions"}`;
+
+  return {
+    title: name,
+    description,
+    openGraph: {
+      title: `${name} | Scenius`,
+      description,
+      type: "profile",
+    },
+    twitter: {
+      card: "summary",
+      title: `${name} | Scenius`,
+      description,
+    },
+  };
+}
 
 export default async function TastemakerProfilePage({ params }: Props) {
   const { id } = await params;

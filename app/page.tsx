@@ -1,5 +1,24 @@
+import type { Metadata } from "next";
 import { getFeedItems } from "@/app/domains/feed/service/feed-service";
 import { FeedCard } from "@/app/components/feed-card";
+
+export const metadata: Metadata = {
+  title: "Scenius — Reputation-weighted predictions on independent music",
+  description:
+    "Tastemakers predict breakout events on SoundCloud tracks. Accurate predictors compound reputation. Attested onchain via EAS.",
+  openGraph: {
+    title: "Scenius — Reputation-weighted predictions on independent music",
+    description:
+      "Tastemakers predict breakout events on SoundCloud tracks. Accurate predictors compound reputation. Attested onchain via EAS.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Scenius — Reputation-weighted predictions on independent music",
+    description:
+      "Tastemakers predict breakout events on SoundCloud tracks. Accurate predictors compound reputation. Attested onchain via EAS.",
+  },
+};
 
 export default async function Home() {
   const items = await getFeedItems({ outcome: "all" });
