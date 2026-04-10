@@ -40,6 +40,8 @@ export async function createPrediction(params: {
   streamThreshold: bigint;
   predictedOutcome: string;
   horizon: string;
+  trackId?: string;
+  trackSnapshotId?: string;
 }): Promise<string> {
   const [inserted] = await db
     .insert(predictions)
@@ -50,6 +52,8 @@ export async function createPrediction(params: {
       streamThreshold: params.streamThreshold,
       predictedOutcome: params.predictedOutcome,
       horizon: params.horizon,
+      trackId: params.trackId ?? null,
+      trackSnapshotId: params.trackSnapshotId ?? null,
     })
     .returning({ id: predictions.id });
 

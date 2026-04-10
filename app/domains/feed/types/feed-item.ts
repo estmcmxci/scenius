@@ -27,7 +27,11 @@ export type FeedItem = {
   tastemakerEnsName: string | null;
   reputationScore: number;
 
-  // catalog snapshot at prediction creation time
+  // track context (null for legacy catalog-only predictions)
+  trackName: string | null;
+  trackArtworkUrl: string | null;
+
+  // snapshot at prediction creation time (track-level if available, else catalog)
   snapshotPlays: number | null;
   snapshotLikes: number | null;
   snapshotReposts: number | null;

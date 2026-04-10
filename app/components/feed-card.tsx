@@ -32,16 +32,23 @@ export function FeedCard({ item }: Props) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            {item.artistAvatarUrl && (
+            {(item.trackArtworkUrl ?? item.artistAvatarUrl) && (
               <img
-                src={item.artistAvatarUrl}
+                src={(item.trackArtworkUrl ?? item.artistAvatarUrl)!}
                 alt=""
                 className="h-8 w-8 rounded-full object-cover"
               />
             )}
-            <p className="text-base font-semibold text-gray-900 truncate">
-              {item.artistName}
-            </p>
+            <div className="min-w-0">
+              <p className="text-base font-semibold text-gray-900 truncate">
+                {item.trackName ?? item.artistName}
+              </p>
+              {item.trackName && (
+                <p className="text-xs text-gray-500 truncate">
+                  {item.artistName}
+                </p>
+              )}
+            </div>
           </div>
 
           <p className="mt-2 text-sm text-gray-700">

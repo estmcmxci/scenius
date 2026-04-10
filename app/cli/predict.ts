@@ -58,7 +58,15 @@ export async function predictCommand(url: string, rawArgs: string[]) {
   console.log(`  Prediction ID: ${result.predictionId}`);
   console.log(`  Artist: ${result.artist.username} (SC ID: ${result.artist.soundcloudId})`);
   console.log(`  Snapshot ID: ${result.snapshotId}`);
-  console.log(`  Current plays: ${result.totals.plays}`);
+  if (result.trackId) {
+    console.log(`  Track ID: ${result.trackId}`);
+    console.log(`  Track snapshot ID: ${result.trackSnapshotId}`);
+  }
+  if (result.trackSnapshot) {
+    console.log(`  Track plays: ${result.trackSnapshot.playbackCount}`);
+  } else if (result.totals) {
+    console.log(`  Catalog plays: ${result.totals.plays}`);
+  }
   console.log(`  Followers: ${result.artist.followersCount}`);
 
   process.exit(0);

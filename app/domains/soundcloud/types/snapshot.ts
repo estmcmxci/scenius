@@ -1,14 +1,16 @@
+export interface ArtistData {
+  soundcloudId: number;
+  username: string;
+  permalinkUrl: string;
+  avatarUrl: string | null;
+  city: string | null;
+  countryCode: string | null;
+  followersCount: number;
+  trackCount: number;
+}
+
 export interface SnapshotResult {
-  artist: {
-    soundcloudId: number;
-    username: string;
-    permalinkUrl: string;
-    avatarUrl: string | null;
-    city: string | null;
-    countryCode: string | null;
-    followersCount: number;
-    trackCount: number;
-  };
+  artist: ArtistData;
   totals: {
     plays: number;
     likes: number;
@@ -20,16 +22,7 @@ export interface SnapshotResult {
 }
 
 export interface TrackSnapshotResult {
-  artist: {
-    soundcloudId: number;
-    username: string;
-    permalinkUrl: string;
-    avatarUrl: string | null;
-    city: string | null;
-    countryCode: string | null;
-    followersCount: number;
-    trackCount: number;
-  };
+  artist: ArtistData;
   track: {
     soundcloudId: number;
     title: string;

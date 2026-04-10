@@ -1,7 +1,12 @@
 import { desc, eq, or } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { predictions } from "@/app/domains/predictions/repo/schema";
-import { artists, catalogSnapshots } from "@/app/domains/soundcloud/repo/schema";
+import {
+  artists,
+  catalogSnapshots,
+  tracks,
+  trackSnapshots,
+} from "@/app/domains/soundcloud/repo/schema";
 import { tastemakers } from "@/app/domains/tastemakers/repo/schema";
 import type { FeedFilters } from "../types/feed-item";
 
@@ -20,7 +25,10 @@ export type FeedRow = {
   tastemakerName: string | null;
   tastemakerWalletAddress: string | null;
   reputationScore: number | null;
-  snapshotPlays: bigint | null;
+  trackName: string | null;
+  trackArtworkUrl: string | null;
+  trackSnapshotPlays: bigint | null;
+  catalogSnapshotPlays: bigint | null;
   snapshotLikes: bigint | null;
   snapshotReposts: bigint | null;
   snapshotFollowers: bigint | null;
@@ -53,7 +61,10 @@ export async function getFeedRows(filters?: FeedFilters): Promise<FeedRow[]> {
       tastemakerName: tastemakers.displayName,
       tastemakerWalletAddress: tastemakers.walletAddress,
       reputationScore: tastemakers.reputationScore,
-      snapshotPlays: catalogSnapshots.totalPlays,
+      trackName: tracks.title,
+      trackArtworkUrl: tracks.artworkUrl,
+      trackSnapshotPlays: trackSnapshots.playbackCount,
+      catalogSnapshotPlays: catalogSnapshots.totalPlays,
       snapshotLikes: catalogSnapshots.totalLikes,
       snapshotReposts: catalogSnapshots.totalReposts,
       snapshotFollowers: catalogSnapshots.followersCount,
@@ -63,6 +74,8 @@ export async function getFeedRows(filters?: FeedFilters): Promise<FeedRow[]> {
     .innerJoin(artists, eq(predictions.artistId, artists.id))
     .innerJoin(tastemakers, eq(predictions.tastemakerId, tastemakers.id))
     .innerJoin(catalogSnapshots, eq(predictions.snapshotId, catalogSnapshots.id))
+    .leftJoin(tracks, eq(predictions.trackId, tracks.id))
+    .leftJoin(trackSnapshots, eq(predictions.trackSnapshotId, trackSnapshots.id))
     .orderBy(desc(predictions.createdAt));
 
   if (whereClause) {
