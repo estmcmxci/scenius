@@ -1,6 +1,6 @@
 # QUALITY.md — Domain Quality Grades
 
-Updated: 2026-04-08 | Status: M3 complete, M4 in progress
+Updated: 2026-04-08 | Status: M9 complete
 
 Grades: A (solid) / B (minor debt) / C (needs work) / D (known holes) / — (not started)
 
@@ -8,34 +8,33 @@ Grades: A (solid) / B (minor debt) / C (needs work) / D (known holes) / — (not
 
 | Domain | Grade | Notes |
 |---|---|---|
-| feed | D | Types, repo, service done (SCE-11). CLI command works. No UI yet. |
-| predictions | D | Schema defined, used by feed + resolution queries. No creation flow yet. |
-| tastemakers | D | Repo, service, profile page done (SCE-14). CLI command works. |
-| soundcloud | C | SC client, snapshot service, repo all working. CLI e2e verified (SCE-6). API route done (SCE-7). Track-level metrics returning 0 (SCE-20). |
-| resolution | D | Cron stub done (SCE-8). Queries due predictions, logs count. No actual resolution yet. |
+| feed | B | Types, repo, service, CLI, UI with dark theme, track support, SC attribution. |
+| predictions | B | Full CRUD, per-track predictions, Zod validation, detail page with OG tags. |
+| tastemakers | B | Repo, service, profile page with ENS resolution, prediction cards. |
+| soundcloud | B | SC client with track resolution, snapshot service, track snapshots, attribution component. |
+| resolution | B | Full pipeline: delta → outcome → reputation → EAS attestation. Cron route wired. |
 
 ## Infrastructure
 
 | Layer | Grade | Notes |
 |---|---|---|
-| Next.js scaffold | C | App Router, layouts, Tailwind configured. One page (tastemaker profile). |
-| Supabase schema | C | 5 tables via Drizzle migrations. IPv4 pooler configured (SCE-5). |
-| Vercel Cron | D | Resolve stub in vercel.json (Fridays noon UTC). Snapshot cron not yet wired. |
-| EAS integration | — | Not started |
-| Memory Protocol | — | Dropped (EAS replaces) |
-| Para auth | — | Not started |
-| CI / linting | — | Not started |
-| .gitignore | ✓ | Done |
-| CLAUDE.md | ✓ | Done — project rules loaded every conversation |
+| Next.js scaffold | B | Dark theme, loading/error boundaries on all routes, mobile responsive, not-found page. |
+| Supabase schema | B | 7 tables: artists, catalog_snapshots, tracks, track_snapshots, predictions, tastemakers, posts. 3 migrations. |
+| Vercel Cron | C | Routes exist (`/api/cron/resolve`, `/api/cron/snapshot`), cron configured in vercel.json. Not yet deployed. |
+| EAS integration | B | Schemas registered on Base Sepolia, attestation service working, test attestations written via CLI. |
+| Para auth | B | SDK integrated, passkey sign-in via ParaModal, server-side session verification. Provider in layout. |
+| CI / linting | — | Not started. |
+| .gitignore | ✓ | Done. |
+| CLAUDE.md | ✓ | Done — project rules loaded every conversation. |
 
 ## Known Debt
 
-- No test coverage (unit tests for reputation math, delta formula needed)
-- No attribution component yet (BELIEFS §2 — required before public launch)
-- No privacy policy (BELIEFS §4 — required before public launch)
-- Stream threshold for MVP is placeholder (500K) — needs genre benchmarking
-- Track-level metrics returning 0 in snapshots (SCE-20)
-- No loading.tsx or error.tsx boundaries on any route
+- No test coverage (unit tests still needed for reputation math, resolution logic)
+- No CI/CD pipeline
+- Loading/error boundaries added but not design-matched to dark theme yet
+- OG images are text-only (no dynamic image generation)
+- ENS resolution uses third-party RPC (llamarpc.com) — may need own node for production
+- Privacy policy is boilerplate — needs legal review before real launch
 
 ## Review Cadence
 
