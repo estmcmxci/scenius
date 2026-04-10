@@ -1,7 +1,7 @@
 import { and, eq, lte, or } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { predictions } from "@/app/domains/predictions/repo/schema";
-import { artists } from "@/app/domains/soundcloud/repo/schema";
+import { artists, tracks } from "@/app/domains/soundcloud/repo/schema";
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -14,9 +14,12 @@ export interface DuePrediction {
   tastemakerId: string;
   artistId: string;
   snapshotId: string;
+  trackSnapshotId: string | null;
   streamThreshold: bigint;
   predictedOutcome: string;
   permalinkUrl: string | null;
+  trackPermalinkUrl: string | null;
+  trackSoundcloudId: bigint | null;
 }
 
 export async function listDuePendingPredictions(now: Date): Promise<DuePrediction[]> {
@@ -26,12 +29,16 @@ export async function listDuePendingPredictions(now: Date): Promise<DuePredictio
       tastemakerId: predictions.tastemakerId,
       artistId: predictions.artistId,
       snapshotId: predictions.snapshotId,
+      trackSnapshotId: predictions.trackSnapshotId,
       streamThreshold: predictions.streamThreshold,
       predictedOutcome: predictions.predictedOutcome,
       permalinkUrl: artists.permalinkUrl,
+      trackPermalinkUrl: tracks.permalinkUrl,
+      trackSoundcloudId: tracks.soundcloudId,
     })
     .from(predictions)
     .innerJoin(artists, eq(predictions.artistId, artists.id))
+    .leftJoin(tracks, eq(predictions.trackId, tracks.id))
     .where(
       and(
         eq(predictions.outcome, "pending"),
