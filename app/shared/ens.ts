@@ -1,12 +1,14 @@
 import { JsonRpcProvider } from "ethers";
 
+const ENS_RPC_URL = process.env.ENS_RPC_URL ?? "https://eth.llamarpc.com";
+
 const ENS_CACHE = new Map<string, string | null>();
 
 let provider: JsonRpcProvider | null = null;
 
 function getProvider(): JsonRpcProvider {
   if (!provider) {
-    provider = new JsonRpcProvider("https://cloudflare-eth.com");
+    provider = new JsonRpcProvider(ENS_RPC_URL);
   }
   return provider;
 }
@@ -14,7 +16,7 @@ function getProvider(): JsonRpcProvider {
 /**
  * Resolve an Ethereum address to its ENS name.
  * Returns null if no ENS name is set or resolution fails.
- * Results are cached in-memory to avoid repeated lookups.
+ * Successful lookups are cached. Failures are not cached so they can be retried.
  */
 export async function resolveEnsName(
   address: string
@@ -28,7 +30,7 @@ export async function resolveEnsName(
     ENS_CACHE.set(address, name);
     return name;
   } catch {
-    ENS_CACHE.set(address, null);
+    // Don't cache failures — allow retry on next request
     return null;
   }
 }
