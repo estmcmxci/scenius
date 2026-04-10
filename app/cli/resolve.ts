@@ -5,6 +5,7 @@ import {
 
 export async function resolveCommand() {
   const isDryRun = process.argv.includes("--dry-run");
+  const isForce = process.argv.includes("--force");
 
   if (isDryRun) {
     const duePredictions = await runWeeklyResolutionDryRun(new Date());
@@ -34,7 +35,11 @@ export async function resolveCommand() {
     process.exit(0);
   }
 
-  const result = await runWeeklyResolution(new Date());
+  if (isForce) {
+    console.log("⚠ Force mode: resolving ALL pending predictions regardless of horizon\n");
+  }
+
+  const result = await runWeeklyResolution(new Date(), { force: isForce });
 
   console.log(`Resolved: ${result.resolved}`);
   console.log(`Errors:   ${result.errors}`);

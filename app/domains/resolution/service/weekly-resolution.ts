@@ -1,7 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { getEnv } from "@/app/config/env";
-import { listDuePendingPredictions } from "@/app/domains/resolution/repo/due-predictions";
+import { listDuePendingPredictions, listAllPendingPredictions } from "@/app/domains/resolution/repo/due-predictions";
 import type { DuePrediction } from "@/app/domains/resolution/repo/due-predictions";
 import { updateReputation } from "@/app/domains/resolution/service/reputation";
 import {
@@ -216,8 +216,10 @@ async function resolveSingle(
   return { predictionId: pred.id, outcome: actualOutcome, delta, newReputation };
 }
 
-export async function runWeeklyResolution(now: Date): Promise<ResolutionResult> {
-  const duePredictions = await listDuePendingPredictions(now);
+export async function runWeeklyResolution(now: Date, opts?: { force?: boolean }): Promise<ResolutionResult> {
+  const duePredictions = opts?.force
+    ? await listAllPendingPredictions()
+    : await listDuePendingPredictions(now);
 
   console.info(JSON.stringify({
     event: "cron.resolve.start",
