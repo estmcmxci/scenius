@@ -4,6 +4,7 @@ import { getPredictionDetail } from "@/app/domains/predictions/service/predictio
 import { getAttestationUrl } from "@/app/config/eas";
 import { resolveEnsName } from "@/app/shared/ens";
 import { formatAddress } from "@/app/shared/format-address";
+import { ScAttribution } from "@/app/shared/components/sc-attribution";
 
 const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-outcome-pending-bg text-outcome-pending-fg",
@@ -145,22 +146,11 @@ export default async function PredictionPage({ params }: Props) {
             </div>
           </div>
         )}
-        <p className="mt-2 text-xs text-fg-faint">
-          Data via{" "}
-          {(track?.permalinkUrl ?? artist.permalinkUrl) ? (
-            <a
-              href={(track?.permalinkUrl ?? artist.permalinkUrl)!}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline hover:text-fg-muted"
-            >
-              SoundCloud
-            </a>
-          ) : (
-            "SoundCloud"
-          )}
-          {" \u00b7 snapshotted "}
-          {(trackSnapshot?.takenAt ?? snapshot.takenAt).toLocaleDateString()}
+        <p className="mt-2">
+          <ScAttribution
+            permalinkUrl={track?.permalinkUrl ?? artist.permalinkUrl}
+            suffix={` \u00b7 snapshotted ${(trackSnapshot?.takenAt ?? snapshot.takenAt).toLocaleDateString()}`}
+          />
         </p>
       </section>
 

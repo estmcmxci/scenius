@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { FeedItem } from "@/app/domains/feed/types/feed-item";
 import { formatAddress } from "@/app/shared/format-address";
+import { ScAttribution } from "@/app/shared/components/sc-attribution";
 
 const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-outcome-pending-bg text-outcome-pending-fg",
@@ -75,7 +76,7 @@ export function FeedCard({ item }: Props) {
             {item.snapshotPlays !== null && (
               <span>
                 {item.snapshotPlays.toLocaleString()} plays at prediction
-                <span className="ml-1 text-fg-faint">via SoundCloud</span>
+                <span className="ml-1"><ScAttribution asSpan /></span>
               </span>
             )}
             <span>rep: {item.reputationScore.toFixed(2)}</span>
