@@ -22,6 +22,6 @@ export async function listPendingTracks(): Promise<
 
   return rows.filter(
     (r): r is { trackId: string; trackPermalinkUrl: string } =>
-      r.trackId !== null && r.trackPermalinkUrl !== null
+      r.trackId !== null && !!r.trackPermalinkUrl?.trim()
   );
 }

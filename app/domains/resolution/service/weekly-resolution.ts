@@ -89,8 +89,11 @@ async function resolveSingle(
   let resolutionSnapshotId: string | null = null;
   let resolutionTrackSnapshotId: string | null = null;
 
-  if (pred.trackPermalinkUrl && pred.trackSnapshotId) {
-    // Track-level resolution
+  if (pred.trackSnapshotId) {
+    // Track-level resolution — key off trackSnapshotId, not permalink truthiness
+    if (!pred.trackPermalinkUrl?.trim()) {
+      throw new Error(`Prediction ${pred.id}: track prediction has blank/missing permalink URL`);
+    }
     const trackResult = await takeTrackSnapshot(pred.trackPermalinkUrl, clientId, clientSecret);
     const artistId = await upsertArtist({ artist: trackResult.artist });
     const trackId = await upsertTrack(trackResult, artistId);
