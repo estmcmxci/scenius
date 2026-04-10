@@ -22,6 +22,11 @@ export async function getFeedItems(filters?: FeedFilters): Promise<FeedItem[]> {
         ? await resolveEnsName(row.tastemakerWalletAddress)
         : null;
 
+      // Prefer track-level plays when available, fall back to catalog plays
+      const snapshotPlays = row.trackSnapshotPlays !== null
+        ? toNumber(row.trackSnapshotPlays)
+        : toNumber(row.catalogSnapshotPlays);
+
       return {
         predictionId: row.predictionId,
         predictedOutcome: row.predictedOutcome as PredictedOutcome,
@@ -38,7 +43,9 @@ export async function getFeedItems(filters?: FeedFilters): Promise<FeedItem[]> {
         tastemakerWalletAddress: row.tastemakerWalletAddress,
         tastemakerEnsName: ensName,
         reputationScore: row.reputationScore ?? 1.0,
-        snapshotPlays: toNumber(row.snapshotPlays),
+        trackName: row.trackName ?? null,
+        trackArtworkUrl: row.trackArtworkUrl ?? null,
+        snapshotPlays,
         snapshotLikes: toNumber(row.snapshotLikes),
         snapshotReposts: toNumber(row.snapshotReposts),
         snapshotFollowers: toNumber(row.snapshotFollowers),

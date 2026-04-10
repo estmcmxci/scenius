@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { artists, catalogSnapshots } from "./schema";
-import type { SnapshotResult } from "../types/snapshot";
+import type { SnapshotResult, ArtistData } from "../types/snapshot";
 
-export async function upsertArtist(snapshot: SnapshotResult): Promise<string> {
+export async function upsertArtist(snapshot: { artist: ArtistData }): Promise<string> {
   const existing = await db
     .select({ id: artists.id })
     .from(artists)
