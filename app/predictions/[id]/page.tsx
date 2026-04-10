@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPredictionDetail } from "@/app/domains/predictions/service/prediction-service";
@@ -6,9 +7,11 @@ import { getAttestationUrl } from "@/app/config/eas";
 import { resolveEnsName } from "@/app/shared/ens";
 import { formatAddress } from "@/app/shared/format-address";
 
+const getCachedDetail = cache((id: string) => getPredictionDetail(id));
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const detail = await getPredictionDetail(id);
+  const detail = await getCachedDetail(id);
   if (!detail) return { title: "Prediction Not Found" };
 
   const { prediction, artist } = detail;
@@ -55,7 +58,7 @@ type Props = {
 
 export default async function PredictionPage({ params }: Props) {
   const { id } = await params;
-  const detail = await getPredictionDetail(id);
+  const detail = await getCachedDetail(id);
 
   if (!detail) {
     notFound();

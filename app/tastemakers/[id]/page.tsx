@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import { notFound } from "next/navigation";
 import { getTastemakerProfile } from "@/app/domains/tastemakers/service/tastemaker-service";
 import { PredictionCard } from "@/app/components/prediction-card";
@@ -9,13 +10,25 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
+const getCachedProfile = cache((id: string) => getTastemakerProfile(id));
+
+async function resolveName(tastemaker: { displayName: string | null; walletAddress: string | null }): Promise<string> {
+  if (tastemaker.walletAddress) {
+    const ens = await resolveEnsName(tastemaker.walletAddress);
+    if (ens) return ens;
+  }
+  if (tastemaker.displayName) return tastemaker.displayName;
+  if (tastemaker.walletAddress) return formatAddress(tastemaker.walletAddress);
+  return "Anonymous";
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const profile = await getTastemakerProfile(id);
+  const profile = await getCachedProfile(id);
   if (!profile) return { title: "Tastemaker Not Found" };
 
   const { tastemaker, stats } = profile;
-  const name = tastemaker.displayName ?? "Anonymous";
+  const name = await resolveName(tastemaker);
   const reputation = tastemaker.reputationScore?.toFixed(3) ?? "N/A";
   const description = `${name} — reputation ${reputation} | ${stats.totalPredictions} predictions, ${stats.winRate !== null ? `${stats.winRate}% win rate` : "no resolved predictions"}`;
 
@@ -37,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function TastemakerProfilePage({ params }: Props) {
   const { id } = await params;
-  const profile = await getTastemakerProfile(id);
+  const profile = await getCachedProfile(id);
 
   if (!profile) {
     notFound();
