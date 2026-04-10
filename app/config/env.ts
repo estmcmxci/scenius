@@ -68,3 +68,17 @@ export function getEasConfig(): EasEnv {
 
   return parsed.data;
 }
+
+const paraEnvSchema = z.object({
+  NEXT_PUBLIC_PARA_API_KEY: z.string().min(1),
+});
+
+export function getParaApiKey(): string {
+  const parsed = paraEnvSchema.safeParse(process.env);
+  if (!parsed.success) {
+    console.error("Invalid Para environment variables:", parsed.error.flatten().fieldErrors);
+    throw new Error("Invalid Para environment variables");
+  }
+
+  return parsed.data.NEXT_PUBLIC_PARA_API_KEY;
+}
