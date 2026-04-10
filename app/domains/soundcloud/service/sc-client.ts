@@ -77,6 +77,38 @@ export function createScClient(clientId: string, clientSecret: string) {
       });
     },
 
+    async resolveUrl(
+      url: string
+    ): Promise<{ kind: "user" | "track"; user: ScUser; track?: ScTrack }> {
+      return withToken(async (token) => {
+        const encoded = encodeURIComponent(url);
+        const data = await scFetch(`/resolve?url=${encoded}`, token);
+        const obj = data as Record<string, unknown>;
+
+        if (obj.kind === "track") {
+          const track = ScTrackSchema.parse(data);
+          const embeddedUser = obj.user as Record<string, unknown> | undefined;
+          if (!embeddedUser?.id) {
+            throw new Error("Track response missing embedded user data");
+          }
+          const user = ScUserSchema.parse(
+            await scFetch(`/users/${embeddedUser.id}`, token)
+          );
+          return { kind: "track", user, track };
+        }
+
+        const user = ScUserSchema.parse(data);
+        return { kind: "user", user };
+      });
+    },
+
+    async getTrack(id: number): Promise<ScTrack> {
+      return withToken(async (token) => {
+        const data = await scFetch(`/tracks/${id}`, token);
+        return ScTrackSchema.parse(data);
+      });
+    },
+
     async getUser(id: number): Promise<ScUser> {
       return withToken(async (token) => {
         const data = await scFetch(`/users/${id}`, token);
