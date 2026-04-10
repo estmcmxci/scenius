@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getPredictionDetail } from "@/app/domains/predictions/service/prediction-service";
 import { getAttestationUrl } from "@/app/config/eas";
+import { resolveEnsName } from "@/app/shared/ens";
+import { formatAddress } from "@/app/shared/format-address";
 
 const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -32,7 +34,10 @@ export default async function PredictionPage({ params }: Props) {
   const outcome = prediction.outcome ?? "pending";
   const outcomeStyle = OUTCOME_STYLES[outcome] ?? OUTCOME_STYLES.pending;
   const horizonLabel = HORIZON_LABELS[prediction.horizon] ?? prediction.horizon;
-  const displayName = tastemaker.displayName ?? "Anonymous";
+  const ensName = tastemaker.walletAddress
+    ? await resolveEnsName(tastemaker.walletAddress)
+    : null;
+  const displayName = ensName ?? tastemaker.displayName ?? "Anonymous";
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
@@ -143,6 +148,11 @@ export default async function PredictionPage({ params }: Props) {
         >
           <div>
             <p className="font-medium text-gray-900">{displayName}</p>
+            {tastemaker.walletAddress && (
+              <p className="text-xs text-gray-400 font-mono">
+                {formatAddress(tastemaker.walletAddress)}
+              </p>
+            )}
             <p className="text-sm text-gray-500">
               Reputation: {tastemaker.reputationScore?.toFixed(3) ?? "—"}
             </p>

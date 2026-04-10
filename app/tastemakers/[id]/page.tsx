@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { getTastemakerProfile } from "@/app/domains/tastemakers/service/tastemaker-service";
 import { PredictionCard } from "@/app/components/prediction-card";
+import { resolveEnsName } from "@/app/shared/ens";
+import { formatAddress } from "@/app/shared/format-address";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -15,7 +17,11 @@ export default async function TastemakerProfilePage({ params }: Props) {
   }
 
   const { tastemaker, predictions, stats } = profile;
-  const displayName = tastemaker.displayName ?? tastemaker.walletAddress ?? "Anonymous";
+  const ensName = tastemaker.walletAddress
+    ? await resolveEnsName(tastemaker.walletAddress)
+    : null;
+  const displayName =
+    ensName ?? tastemaker.displayName ?? tastemaker.walletAddress ?? "Anonymous";
   const reputation = tastemaker.reputationScore?.toFixed(3) ?? "—";
 
   return (
@@ -23,9 +29,9 @@ export default async function TastemakerProfilePage({ params }: Props) {
       {/* Profile header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">{displayName}</h1>
-        {tastemaker.walletAddress && tastemaker.displayName && (
+        {tastemaker.walletAddress && (
           <p className="mt-1 text-sm text-gray-500 font-mono">
-            {tastemaker.walletAddress}
+            {formatAddress(tastemaker.walletAddress)}
           </p>
         )}
         <p className="mt-3 text-lg text-gray-600">

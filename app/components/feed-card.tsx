@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { FeedItem } from "@/app/domains/feed/types/feed-item";
+import { formatAddress } from "@/app/shared/format-address";
 
 const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -44,7 +45,13 @@ export function FeedCard({ item }: Props) {
           </div>
 
           <p className="mt-2 text-sm text-gray-700">
-            <span className="font-medium">{item.tastemakerName ?? "Anonymous"}</span>
+            <span className="font-medium">
+              {item.tastemakerEnsName
+                ?? item.tastemakerName
+                ?? (item.tastemakerWalletAddress
+                  ? formatAddress(item.tastemakerWalletAddress)
+                  : "Anonymous")}
+            </span>
             {" predicts "}
             <span className="font-medium">
               {item.predictedOutcome === "yes" ? "will" : "will not"}
