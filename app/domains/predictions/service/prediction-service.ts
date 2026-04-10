@@ -7,6 +7,9 @@ import {
 } from "@/app/domains/soundcloud/repo/snapshot-repo";
 import { createPrediction } from "@/app/domains/predictions/repo/prediction-repo";
 import type { CreatePredictionInput } from "@/app/domains/predictions/types/create-prediction";
+
+/** Input with tastemakerId guaranteed resolved (by API or CLI). */
+type ResolvedPredictionInput = CreatePredictionInput & { tastemakerId: string };
 import type { SnapshotResult } from "@/app/domains/soundcloud/types/snapshot";
 
 export async function getPredictionDetail(id: string): Promise<PredictionDetail | null> {
@@ -22,7 +25,7 @@ export interface SubmitPredictionResult {
 }
 
 export async function submitPrediction(
-  input: CreatePredictionInput
+  input: ResolvedPredictionInput
 ): Promise<SubmitPredictionResult> {
   const env = getEnv();
 

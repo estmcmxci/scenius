@@ -29,6 +29,31 @@ export async function getTastemakerById(
   return rows[0] ?? null;
 }
 
+export async function findOrCreateByWallet(
+  walletAddress: string
+): Promise<TastemakerRow> {
+  const normalized = walletAddress.toLowerCase();
+
+  const existing = await db
+    .select()
+    .from(tastemakers)
+    .where(eq(tastemakers.walletAddress, normalized))
+    .limit(1);
+
+  if (existing[0]) return existing[0];
+
+  const [created] = await db
+    .insert(tastemakers)
+    .values({
+      walletAddress: normalized,
+      reputationScore: 1.0,
+      totalPredictions: 0,
+    })
+    .returning();
+
+  return created;
+}
+
 export async function getPredictionsByTastemaker(
   tastemakerId: string
 ): Promise<PredictionWithArtist[]> {

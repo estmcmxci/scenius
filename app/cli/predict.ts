@@ -46,7 +46,13 @@ export async function predictCommand(url: string, rawArgs: string[]) {
   console.log(`  Outcome: ${parsed.data.predictedOutcome}`);
   console.log(`  Tastemaker: ${parsed.data.tastemakerId}`);
 
-  const result = await submitPrediction(parsed.data);
+  const tastemakerId = parsed.data.tastemakerId;
+  if (!tastemakerId) {
+    console.error("tastemakerId is required for CLI usage");
+    process.exit(1);
+  }
+
+  const result = await submitPrediction({ ...parsed.data, tastemakerId });
 
   console.log(`\nPrediction created!`);
   console.log(`  Prediction ID: ${result.predictionId}`);

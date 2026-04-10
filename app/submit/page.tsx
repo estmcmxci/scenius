@@ -2,7 +2,9 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useAccount, useModal, useClient } from "@getpara/react-sdk";
 import { ArtistPreview } from "@/app/components/artist-preview";
+import { formatAddress } from "@/app/shared/format-address";
 
 const HORIZONS = ["1w", "2w", "4w", "8w"] as const;
 type Horizon = (typeof HORIZONS)[number];
@@ -11,13 +13,19 @@ type FieldErrors = Record<string, string[]>;
 
 export default function SubmitPage() {
   const router = useRouter();
+  const { isConnected, embedded } = useAccount();
+  const { openModal } = useModal();
+  const para = useClient();
+
+  const wallets = embedded?.wallets ?? [];
+  const evmWallet = wallets.find((w) => w.type === "EVM");
+  const walletAddress = evmWallet?.address ?? null;
 
   const [url, setUrl] = useState("");
   const [debouncedUrl, setDebouncedUrl] = useState("");
   const [streamThreshold, setStreamThreshold] = useState("");
   const [predictedOutcome, setPredictedOutcome] = useState<"yes" | "no">("yes");
   const [horizon, setHorizon] = useState<Horizon>("2w");
-  const [tastemakerId, setTastemakerId] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -32,20 +40,29 @@ export default function SubmitPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!walletAddress) return;
     setFieldErrors({});
     setFormError(null);
     setSubmitting(true);
 
     try {
+      const sessionToken = para ? await para.exportSession() : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (sessionToken) {
+        headers["x-para-session"] = sessionToken;
+      }
+
       const res = await fetch("/api/predictions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           url: url.trim(),
           streamThreshold: Number(streamThreshold),
           predictedOutcome,
           horizon,
-          tastemakerId: tastemakerId.trim(),
+          walletAddress,
         }),
       });
 
@@ -72,6 +89,27 @@ export default function SubmitPage() {
     }
   };
 
+  if (!isConnected) {
+    return (
+      <main className="mx-auto max-w-2xl px-4 py-12">
+        <header className="mb-10">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Submit a Prediction
+          </h1>
+          <p className="mt-2 text-base text-gray-600">
+            Sign in to submit a prediction on an independent artist.
+          </p>
+        </header>
+        <button
+          onClick={() => openModal()}
+          className="rounded-md bg-gray-900 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+        >
+          Sign In to Submit
+        </button>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       <header className="mb-10">
@@ -83,6 +121,15 @@ export default function SubmitPage() {
           within a given time horizon.
         </p>
       </header>
+
+      {walletAddress && (
+        <div className="mb-8 rounded-md border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
+          Predicting as:{" "}
+          <span className="font-mono font-medium">
+            {formatAddress(walletAddress)}
+          </span>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* SoundCloud URL */}
@@ -165,22 +212,6 @@ export default function SubmitPage() {
           </div>
         </Field>
 
-        {/* Tastemaker ID */}
-        <Field
-          label="Tastemaker ID"
-          error={fieldErrors.tastemakerId}
-          hint="Your tastemaker identifier"
-        >
-          <input
-            type="text"
-            value={tastemakerId}
-            onChange={(e) => setTastemakerId(e.target.value)}
-            placeholder="e.g. tm_abc123"
-            className={inputClass(fieldErrors.tastemakerId)}
-            required
-          />
-        </Field>
-
         {/* Form-level error */}
         {formError && (
           <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
@@ -201,7 +232,7 @@ export default function SubmitPage() {
   );
 }
 
-/* ── Helpers ─────────────────────────────────────────── */
+/* -- Helpers ------------------------------------------------- */
 
 function Field({
   label,
