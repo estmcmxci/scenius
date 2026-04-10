@@ -1,4 +1,4 @@
-import { and, eq, or, isNull } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { getEnv } from "@/app/config/env";
 import { listDuePendingPredictions } from "@/app/domains/resolution/repo/due-predictions";
@@ -9,8 +9,10 @@ import {
   attestReputationSnapshot,
 } from "@/app/domains/resolution/service/eas-service";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
+import { takeTrackSnapshot } from "@/app/domains/soundcloud/service/track-snapshot";
 import { upsertArtist, insertSnapshot } from "@/app/domains/soundcloud/repo/snapshot-repo";
-import { catalogSnapshots } from "@/app/domains/soundcloud/repo/schema";
+import { upsertTrack, insertTrackSnapshot } from "@/app/domains/soundcloud/repo/track-repo";
+import { catalogSnapshots, trackSnapshots } from "@/app/domains/soundcloud/repo/schema";
 import { predictions } from "@/app/domains/predictions/repo/schema";
 import { tastemakers } from "@/app/domains/tastemakers/repo/schema";
 
@@ -38,6 +40,16 @@ async function getCreationPlays(snapshotId: string): Promise<bigint | null> {
     .limit(1);
 
   return rows[0]?.totalPlays ?? null;
+}
+
+async function getCreationTrackPlays(trackSnapshotId: string): Promise<bigint | null> {
+  const rows = await db
+    .select({ playbackCount: trackSnapshots.playbackCount })
+    .from(trackSnapshots)
+    .where(eq(trackSnapshots.id, trackSnapshotId))
+    .limit(1);
+
+  return rows[0]?.playbackCount ?? null;
 }
 
 interface TastemakerInfo {
@@ -73,17 +85,42 @@ async function resolveSingle(
     throw new Error(`Prediction ${pred.id}: artist has no permalinkUrl`);
   }
 
-  const snapshot = await takeSnapshot(pred.permalinkUrl, clientId, clientSecret);
-  const artistId = await upsertArtist(snapshot);
-  const resolutionSnapshotId = await insertSnapshot(artistId, snapshot);
+  let delta: number;
+  let resolutionSnapshotId: string | null = null;
+  let resolutionTrackSnapshotId: string | null = null;
 
-  const creationPlays = await getCreationPlays(pred.snapshotId);
-  if (creationPlays === null) {
-    throw new Error(`Prediction ${pred.id}: creation snapshot ${pred.snapshotId} not found`);
+  if (pred.trackSnapshotId) {
+    // Track-level resolution — key off trackSnapshotId, not permalink truthiness
+    if (!pred.trackPermalinkUrl?.trim()) {
+      throw new Error(`Prediction ${pred.id}: track prediction has blank/missing permalink URL`);
+    }
+    const trackResult = await takeTrackSnapshot(pred.trackPermalinkUrl, clientId, clientSecret);
+    const artistId = await upsertArtist({ artist: trackResult.artist });
+    const trackId = await upsertTrack(trackResult, artistId);
+    resolutionTrackSnapshotId = await insertTrackSnapshot(trackId, trackResult);
+
+    const creationPlays = await getCreationTrackPlays(pred.trackSnapshotId);
+    if (creationPlays === null) {
+      throw new Error(`Prediction ${pred.id}: creation track snapshot ${pred.trackSnapshotId} not found`);
+    }
+
+    const currentPlays = trackResult.snapshot.playbackCount;
+    delta = currentPlays - Number(creationPlays);
+  } else {
+    // Legacy catalog-level resolution
+    const snapshot = await takeSnapshot(pred.permalinkUrl, clientId, clientSecret);
+    const artistId = await upsertArtist(snapshot);
+    resolutionSnapshotId = await insertSnapshot(artistId, snapshot);
+
+    const creationPlays = await getCreationPlays(pred.snapshotId);
+    if (creationPlays === null) {
+      throw new Error(`Prediction ${pred.id}: creation snapshot ${pred.snapshotId} not found`);
+    }
+
+    const currentPlays = Number(snapshot.totals.plays);
+    delta = currentPlays - Number(creationPlays);
   }
 
-  const currentPlays = Number(snapshot.totals.plays);
-  const delta = currentPlays - Number(creationPlays);
   const threshold = Number(pred.streamThreshold);
   const actualOutcome: BinaryOutcome = delta >= threshold ? "yes" : "no";
   const predictedOutcome = pred.predictedOutcome as BinaryOutcome;
@@ -98,6 +135,7 @@ async function resolveSingle(
         outcome: actualOutcome,
         resolvedAt: new Date(),
         resolutionSnapshotId,
+        resolutionTrackSnapshotId,
       })
       .where(and(eq(predictions.id, pred.id), eq(predictions.outcome, "pending")))
       .returning({ id: predictions.id });
@@ -226,70 +264,6 @@ export async function runWeeklyResolution(now: Date): Promise<ResolutionResult> 
     skipped: result.skipped,
     errors: result.errors,
   }));
-
-  return result;
-}
-
-export async function retryUnattested(): Promise<{ retried: number; succeeded: number; failed: number }> {
-  const unattested = await db
-    .select({
-      id: predictions.id,
-      predictedOutcome: predictions.predictedOutcome,
-      outcome: predictions.outcome,
-      streamThreshold: predictions.streamThreshold,
-      snapshotId: predictions.snapshotId,
-      resolutionSnapshotId: predictions.resolutionSnapshotId,
-      tastemakerId: predictions.tastemakerId,
-    })
-    .from(predictions)
-    .where(
-      and(
-        or(eq(predictions.outcome, "yes"), eq(predictions.outcome, "no")),
-        isNull(predictions.easAttestationUid)
-      )
-    );
-
-  const result = { retried: unattested.length, succeeded: 0, failed: 0 };
-
-  for (const pred of unattested) {
-    const info = await getTastemakerInfo(pred.tastemakerId);
-    if (!info.walletAddress) {
-      result.failed++;
-      continue;
-    }
-
-    const creationPlays = await getCreationPlays(pred.snapshotId);
-    let delta = 0;
-    if (creationPlays !== null && pred.resolutionSnapshotId) {
-      const resRows = await db
-        .select({ totalPlays: catalogSnapshots.totalPlays })
-        .from(catalogSnapshots)
-        .where(eq(catalogSnapshots.id, pred.resolutionSnapshotId))
-        .limit(1);
-      const resPlays = resRows[0]?.totalPlays ?? BigInt(0);
-      delta = Math.max(0, Number(resPlays) - Number(creationPlays));
-    }
-
-    try {
-      const uid = await attestPredictionOutcome({
-        predictionId: pred.id,
-        tastemakerAddress: info.walletAddress,
-        predictedYes: pred.predictedOutcome === "yes",
-        outcomeYes: pred.outcome === "yes",
-        streamThreshold: pred.streamThreshold,
-        scDelta: BigInt(delta),
-      });
-
-      await db
-        .update(predictions)
-        .set({ easAttestationUid: uid })
-        .where(eq(predictions.id, pred.id));
-
-      result.succeeded++;
-    } catch {
-      result.failed++;
-    }
-  }
 
   return result;
 }

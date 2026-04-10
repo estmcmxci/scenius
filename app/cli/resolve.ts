@@ -19,6 +19,12 @@ export async function resolveCommand() {
     for (const pred of duePredictions) {
       console.log(`  id:         ${pred.id}`);
       console.log(`  artist:     ${pred.permalinkUrl ?? "(no URL)"}`);
+      if (pred.trackPermalinkUrl) {
+        console.log(`  track:      ${pred.trackPermalinkUrl}`);
+        console.log(`  type:       track-level`);
+      } else {
+        console.log(`  type:       catalog-level`);
+      }
       console.log(`  threshold:  ${pred.streamThreshold}`);
       console.log(`  predicted:  ${pred.predictedOutcome}`);
       console.log(`  tastemaker: ${pred.tastemakerId}`);

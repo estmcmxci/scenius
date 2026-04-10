@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getCronSecret, getEnv } from "@/app/config/env";
 import { listPendingArtists } from "@/app/domains/resolution/repo/pending-artists";
+import { listPendingTracks } from "@/app/domains/resolution/repo/pending-tracks";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
+import { takeTrackSnapshot } from "@/app/domains/soundcloud/service/track-snapshot";
 import {
   upsertArtist,
   insertSnapshot,
 } from "@/app/domains/soundcloud/repo/snapshot-repo";
+import { upsertTrack, insertTrackSnapshot } from "@/app/domains/soundcloud/repo/track-repo";
 
 const cronHeadersSchema = z.object({
   authorization: z.string().regex(/^Bearer\s+\S+$/).optional(),
@@ -52,8 +55,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const env = getEnv();
   const pendingArtists = await listPendingArtists();
+  const pendingTracks = await listPendingTracks();
 
   let artistsSnapshotted = 0;
+  let tracksSnapshotted = 0;
   let errors = 0;
 
   for (const { permalinkUrl } of pendingArtists) {
@@ -73,9 +78,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
   }
 
+  for (const { trackPermalinkUrl } of pendingTracks) {
+    try {
+      const result = await takeTrackSnapshot(
+        trackPermalinkUrl,
+        env.SOUNDCLOUD_CLIENT_ID,
+        env.SOUNDCLOUD_CLIENT_SECRET
+      );
+
+      const artistId = await upsertArtist({ artist: result.artist });
+      const trackId = await upsertTrack(result, artistId);
+      await insertTrackSnapshot(trackId, result);
+      tracksSnapshotted++;
+    } catch (err) {
+      errors++;
+      console.error(`Track snapshot failed for ${trackPermalinkUrl}:`, err);
+    }
+  }
+
   console.log(
-    `Snapshot cron complete: ${artistsSnapshotted} snapshotted, ${errors} errors`
+    `Snapshot cron complete: ${artistsSnapshotted} artists, ${tracksSnapshotted} tracks, ${errors} errors`
   );
 
-  return NextResponse.json({ artistsSnapshotted, errors }, { status: 200 });
+  return NextResponse.json({ artistsSnapshotted, tracksSnapshotted, errors }, { status: 200 });
 }
