@@ -91,18 +91,18 @@ export default function SubmitPage() {
 
   if (!isConnected) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12">
-        <header className="mb-10">
-          <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
+      <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+        <header className="mb-8 sm:mb-10">
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-fg">
             Submit a Prediction
           </h1>
-          <p className="mt-2 text-base text-fg-muted leading-relaxed">
+          <p className="mt-2 text-sm sm:text-base text-fg-muted leading-relaxed">
             Sign in to submit a prediction on an independent artist.
           </p>
         </header>
         <button
           onClick={() => openModal()}
-          className="rounded-md bg-fg px-4 py-3 text-sm font-medium text-bg transition-colors hover:bg-fg-muted"
+          className="w-full sm:w-auto rounded-md bg-fg px-4 py-3 text-sm font-medium text-bg transition-colors hover:bg-fg-muted min-h-[44px]"
         >
           Sign In to Submit
         </button>
@@ -111,12 +111,12 @@ export default function SubmitPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <header className="mb-10">
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+      <header className="mb-8 sm:mb-10">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-fg">
           Submit a Prediction
         </h1>
-        <p className="mt-2 text-base text-fg-muted leading-relaxed">
+        <p className="mt-2 text-sm sm:text-base text-fg-muted leading-relaxed">
           Predict whether an independent artist will hit a stream threshold
           within a given time horizon.
         </p>
@@ -178,7 +178,7 @@ export default function SubmitPage() {
           label="Your Prediction"
           error={fieldErrors.predictedOutcome}
         >
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <button
               type="button"
               onClick={() => setPredictedOutcome("yes")}
@@ -198,7 +198,7 @@ export default function SubmitPage() {
 
         {/* Horizon */}
         <Field label="Time Horizon" error={fieldErrors.horizon}>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {HORIZONS.map((h) => (
               <button
                 key={h}
@@ -274,7 +274,7 @@ function inputClass(error?: string[]): string {
 
 function toggleClass(active: boolean): string {
   const base =
-    "rounded-md px-4 py-2 text-sm font-medium transition-colors";
+    "rounded-md px-4 py-2.5 sm:py-2 text-sm font-medium transition-colors min-h-[44px] inline-flex items-center justify-center";
   return active
     ? `${base} bg-fg text-bg`
     : `${base} bg-bg-elevated text-fg-muted hover:text-fg hover:bg-bg-raised`;

@@ -40,7 +40,7 @@ export default async function PredictionPage({ params }: Props) {
   const displayName = ensName ?? tastemaker.displayName ?? "Anonymous";
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
       {/* Back link */}
       <Link href="/" className="text-sm text-fg-faint hover:text-fg-muted transition-colors">
         &larr; Back to feed
@@ -57,7 +57,7 @@ export default async function PredictionPage({ params }: Props) {
             />
           )}
           <div>
-            <h1 className="font-serif text-2xl font-bold text-fg">
+            <h1 className="font-serif text-xl sm:text-2xl font-bold text-fg break-words">
               {track ? track.title : artist.username}
             </h1>
             {track ? (
@@ -97,48 +97,48 @@ export default async function PredictionPage({ params }: Props) {
           {trackSnapshot ? "Track at prediction time" : "Catalog at prediction time"}
         </h2>
         {trackSnapshot ? (
-          <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-bg-raised p-4">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 rounded-lg border border-border bg-bg-raised p-3 sm:p-4">
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(trackSnapshot.playbackCount ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">plays</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(trackSnapshot.likesCount ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">likes</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(trackSnapshot.repostsCount ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">reposts</p>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-bg-raised p-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 rounded-lg border border-border bg-bg-raised p-3 sm:p-4">
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(snapshot.totalPlays ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">plays</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(snapshot.followersCount ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">followers</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(snapshot.totalLikes ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">likes</p>
             </div>
             <div>
-              <p className="text-xl font-bold text-fg">
+              <p className="text-lg sm:text-xl font-bold text-fg">
                 {Number(snapshot.totalReposts ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-fg-faint">reposts</p>

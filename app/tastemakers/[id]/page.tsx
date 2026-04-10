@@ -25,10 +25,10 @@ export default async function TastemakerProfilePage({ params }: Props) {
   const reputation = tastemaker.reputationScore?.toFixed(3) ?? "\u2014";
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
       {/* Profile header */}
       <div className="mb-8">
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-fg break-words">
           {displayName}
         </h1>
         {tastemaker.walletAddress && (
@@ -43,21 +43,21 @@ export default async function TastemakerProfilePage({ params }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="mb-8 grid grid-cols-3 gap-4 rounded-lg border border-border bg-bg-raised p-4">
+      <div className="mb-8 grid grid-cols-3 gap-2 sm:gap-4 rounded-lg border border-border bg-bg-raised p-3 sm:p-4">
         <div className="text-center">
-          <p className="text-2xl font-bold text-fg">
+          <p className="text-xl sm:text-2xl font-bold text-fg">
             {stats.totalPredictions}
           </p>
           <p className="text-xs text-fg-faint mt-0.5">Total predictions</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-fg">
+          <p className="text-xl sm:text-2xl font-bold text-fg">
             {stats.resolvedPredictions}
           </p>
           <p className="text-xs text-fg-faint mt-0.5">Resolved</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-bold text-fg">
+          <p className="text-xl sm:text-2xl font-bold text-fg">
             {stats.winRate !== null ? `${stats.winRate}%` : "\u2014"}
           </p>
           <p className="text-xs text-fg-faint mt-0.5">Win rate</p>

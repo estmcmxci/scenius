@@ -16,11 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen bg-bg text-fg antialiased">
+      <body className="min-h-screen bg-bg text-fg antialiased overflow-x-hidden">
         <ParaProvider>
           <Nav />
           {children}
-          <footer className="border-t border-gray-200 mt-12">
+          <footer className="border-t border-border mt-12">
             <div className="mx-auto max-w-2xl px-4 py-4 flex justify-center">
               <Link
                 href="/privacy"
