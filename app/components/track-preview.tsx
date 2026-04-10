@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { ScAttribution } from "@/app/shared/components/sc-attribution";
 
 type TrackData = {
   artist: {
@@ -154,16 +155,11 @@ export function TrackPreview({ url }: Props) {
           <Stat label="Reposts" value={trackSnapshot.repostsCount} />
         </div>
 
-        <p className="mt-4 text-xs text-fg-faint">
-          Data from{" "}
-          <a
-            href={track.permalinkUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-fg-muted"
-          >
-            {track.title} by {artist.username} on SoundCloud
-          </a>
+        <p className="mt-4">
+          <ScAttribution
+            permalinkUrl={track.permalinkUrl}
+            label={`${track.title} by ${artist.username} on SoundCloud`}
+          />
         </p>
       </div>
     );
@@ -194,16 +190,11 @@ export function TrackPreview({ url }: Props) {
           <Stat label="Reposts" value={totals.reposts} />
         </div>
 
-        <p className="mt-4 text-xs text-fg-faint">
-          Data from{" "}
-          <a
-            href={artist.permalinkUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-fg-muted"
-          >
-            {artist.username} on SoundCloud
-          </a>
+        <p className="mt-4">
+          <ScAttribution
+            permalinkUrl={artist.permalinkUrl}
+            label={`${artist.username} on SoundCloud`}
+          />
         </p>
       </div>
     );
