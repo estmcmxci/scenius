@@ -32,16 +32,19 @@ export interface SubmitPredictionResult {
   trackSnapshot?: TrackSnapshotResult["snapshot"];
 }
 
-/** Try track snapshot first; fall back to catalog snapshot for artist URLs. */
+/** Resolve URL via SC API kind, then snapshot accordingly. */
 async function snapshotUrl(url: string, clientId: string, clientSecret: string) {
-  try {
+  const { createScClient } = await import("@/app/domains/soundcloud/service/sc-client");
+  const sc = createScClient(clientId, clientSecret);
+  const resolved = await sc.resolveUrl(url);
+
+  if (resolved.kind === "track") {
     const trackResult = await takeTrackSnapshot(url, clientId, clientSecret);
     return { kind: "track" as const, trackResult };
-  } catch {
-    // Not a track URL — fall back to catalog snapshot
-    const catalogResult = await takeSnapshot(url, clientId, clientSecret);
-    return { kind: "catalog" as const, catalogResult };
   }
+
+  const catalogResult = await takeSnapshot(url, clientId, clientSecret);
+  return { kind: "catalog" as const, catalogResult };
 }
 
 export async function submitPrediction(
@@ -67,6 +70,13 @@ export async function submitPrediction(
       env.SOUNDCLOUD_CLIENT_ID,
       env.SOUNDCLOUD_CLIENT_SECRET
     );
+
+    if (catalogSnapshot.totals.tracksFetched === 0) {
+      throw new Error(
+        `No tracks returned for ${trackResult.artist.username}. Artist may be label-distributed and unsupported by the SC API.`
+      );
+    }
+
     const snapshotId = await insertSnapshot(artistId, catalogSnapshot);
 
     const predictionId = await createPrediction({
