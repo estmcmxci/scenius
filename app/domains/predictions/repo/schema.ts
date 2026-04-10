@@ -1,6 +1,6 @@
 import { sql } from "drizzle-orm";
 import { pgTable, uuid, text, bigint, timestamp, index, check } from "drizzle-orm/pg-core";
-import { artists, catalogSnapshots } from "@/app/domains/soundcloud/repo/schema";
+import { artists, catalogSnapshots, tracks, trackSnapshots } from "@/app/domains/soundcloud/repo/schema";
 import { tastemakers } from "@/app/domains/tastemakers/repo/schema";
 
 export const predictions = pgTable(
@@ -22,6 +22,13 @@ export const predictions = pgTable(
     outcome: text("outcome").default("pending"),
     resolutionSnapshotId: uuid("resolution_snapshot_id").references(
       () => catalogSnapshots.id
+    ),
+    trackId: uuid("track_id").references(() => tracks.id),
+    trackSnapshotId: uuid("track_snapshot_id").references(
+      () => trackSnapshots.id
+    ),
+    resolutionTrackSnapshotId: uuid("resolution_track_snapshot_id").references(
+      () => trackSnapshots.id
     ),
     easAttestationUid: text("eas_attestation_uid"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
