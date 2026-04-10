@@ -1,22 +1,16 @@
+import { createScClient } from "@/app/domains/soundcloud/service/sc-client";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
 import { takeTrackSnapshot } from "@/app/domains/soundcloud/service/track-snapshot";
 import { getEnv } from "@/app/config/env";
 
-function isTrackUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    // Track URLs have at least two path segments: /username/track-slug
-    const segments = parsed.pathname.split("/").filter(Boolean);
-    return segments.length >= 2;
-  } catch {
-    return false;
-  }
-}
-
 export async function previewCommand(url: string) {
   const env = getEnv();
+  const sc = createScClient(env.SOUNDCLOUD_CLIENT_ID, env.SOUNDCLOUD_CLIENT_SECRET);
 
-  if (isTrackUrl(url)) {
+  // Use SC API resolve to determine if URL is a track or user
+  const resolved = await sc.resolveUrl(url);
+
+  if (resolved.kind === "track" && resolved.track) {
     console.log(`Resolving track: ${url}\n`);
 
     const result = await takeTrackSnapshot(

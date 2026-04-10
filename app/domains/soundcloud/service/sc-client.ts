@@ -87,9 +87,12 @@ export function createScClient(clientId: string, clientSecret: string) {
 
         if (obj.kind === "track") {
           const track = ScTrackSchema.parse(data);
-          const userId = (obj.user as Record<string, unknown>).id as number;
+          const embeddedUser = obj.user as Record<string, unknown> | undefined;
+          if (!embeddedUser?.id) {
+            throw new Error("Track response missing embedded user data");
+          }
           const user = ScUserSchema.parse(
-            await scFetch(`/users/${userId}`, token)
+            await scFetch(`/users/${embeddedUser.id}`, token)
           );
           return { kind: "track", user, track };
         }
