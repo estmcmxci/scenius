@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useAccount, useModal } from "@getpara/react-sdk";
+import { useAccount, useModal, useClient } from "@getpara/react-sdk";
 import { ArtistPreview } from "@/app/components/artist-preview";
 import { formatAddress } from "@/app/shared/format-address";
 
@@ -15,6 +15,7 @@ export default function SubmitPage() {
   const router = useRouter();
   const { isConnected, embedded } = useAccount();
   const { openModal } = useModal();
+  const para = useClient();
 
   const wallets = embedded?.wallets ?? [];
   const evmWallet = wallets.find((w) => w.type === "EVM");
@@ -45,9 +46,17 @@ export default function SubmitPage() {
     setSubmitting(true);
 
     try {
+      const sessionToken = para ? await para.exportSession() : null;
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (sessionToken) {
+        headers["x-para-session"] = sessionToken;
+      }
+
       const res = await fetch("/api/predictions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           url: url.trim(),
           streamThreshold: Number(streamThreshold),
