@@ -29,7 +29,7 @@ export async function feedCommand(outcomeArg?: string): Promise<void> {
     console.log(
       [
         `[${item.outcome.toUpperCase()}] ${item.artistName} — ${item.predictedOutcome.toUpperCase()} ${threshold} streams in ${item.horizon}`,
-        `  tastemaker: ${item.tastemakerName ?? item.tastemakerId} (rep: ${item.reputationScore.toFixed(3)})`,
+        `  tastemaker: ${item.tastemakerEnsName ?? item.tastemakerName ?? item.tastemakerId} (rep: ${item.reputationScore.toFixed(3)})`,
         `  plays at creation: ${plays}  created: ${created}`,
         `  id: ${item.predictionId}`,
       ].join("\n")

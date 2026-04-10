@@ -23,6 +23,8 @@ export type FeedItem = {
   // tastemaker context
   tastemakerId: string;
   tastemakerName: string | null;
+  tastemakerWalletAddress: string | null;
+  tastemakerEnsName: string | null;
   reputationScore: number;
 
   // catalog snapshot at prediction creation time

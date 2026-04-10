@@ -18,6 +18,7 @@ export type FeedRow = {
   artistAvatarUrl: string | null;
   tastemakerId: string;
   tastemakerName: string | null;
+  tastemakerWalletAddress: string | null;
   reputationScore: number | null;
   snapshotPlays: bigint | null;
   snapshotLikes: bigint | null;
@@ -50,6 +51,7 @@ export async function getFeedRows(filters?: FeedFilters): Promise<FeedRow[]> {
       artistAvatarUrl: artists.avatarUrl,
       tastemakerId: tastemakers.id,
       tastemakerName: tastemakers.displayName,
+      tastemakerWalletAddress: tastemakers.walletAddress,
       reputationScore: tastemakers.reputationScore,
       snapshotPlays: catalogSnapshots.totalPlays,
       snapshotLikes: catalogSnapshots.totalLikes,
