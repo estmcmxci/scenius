@@ -12,16 +12,16 @@ export function Nav() {
           Scenius
         </Link>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 sm:gap-6">
           <Link
             href="/resolved"
-            className="text-sm text-fg-muted hover:text-fg transition-colors"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 sm:px-0 text-sm text-fg-muted hover:text-fg transition-colors"
           >
             Resolved
           </Link>
           <Link
             href="/submit"
-            className="text-sm text-fg-muted hover:text-fg transition-colors"
+            className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] px-2 sm:px-0 text-sm text-fg-muted hover:text-fg transition-colors"
           >
             Submit
           </Link>

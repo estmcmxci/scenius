@@ -28,7 +28,7 @@ export function FeedCard({ item }: Props) {
   return (
     <Link
       href={`/predictions/${item.predictionId}`}
-      className="group block rounded-lg border border-border bg-bg-raised p-5 transition-all hover:border-border-hover hover:bg-bg-elevated"
+      className="group block rounded-lg border border-border bg-bg-raised p-4 sm:p-5 transition-all hover:border-border-hover hover:bg-bg-elevated"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
@@ -72,7 +72,7 @@ export function FeedCard({ item }: Props) {
             {horizonLabel}
           </p>
 
-          <div className="mt-3 flex items-center gap-4 text-xs text-fg-faint">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-fg-faint">
             {item.snapshotPlays !== null && (
               <span>
                 {item.snapshotPlays.toLocaleString()} plays at prediction

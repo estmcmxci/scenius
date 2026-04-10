@@ -5,9 +5,9 @@ export default async function ResolvedPage() {
   const items = await getFeedItems({ outcome: "resolved" });
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-12">
-      <header className="mb-10">
-        <h1 className="font-serif text-3xl font-bold tracking-tight text-fg">
+    <main className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+      <header className="mb-8 sm:mb-10">
+        <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight text-fg">
           Resolved
         </h1>
         <p className="mt-2 text-base text-fg-muted leading-relaxed">

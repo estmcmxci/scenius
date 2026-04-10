@@ -104,12 +104,12 @@ export function TrackPreview({ url }: Props) {
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-border bg-bg-raised p-5 animate-pulse">
+      <div className="rounded-lg border border-border bg-bg-raised p-4 sm:p-5 animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded bg-bg-elevated" />
-          <div className="space-y-2">
-            <div className="h-4 w-40 rounded bg-bg-elevated" />
-            <div className="h-3 w-24 rounded bg-bg-elevated" />
+          <div className="h-12 w-12 shrink-0 rounded bg-bg-elevated" />
+          <div className="space-y-2 min-w-0">
+            <div className="h-4 w-40 max-w-full rounded bg-bg-elevated" />
+            <div className="h-3 w-24 max-w-full rounded bg-bg-elevated" />
           </div>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3">
@@ -132,24 +132,24 @@ export function TrackPreview({ url }: Props) {
   if (trackData) {
     const { artist, track, trackSnapshot } = trackData;
     return (
-      <div className="rounded-lg border border-border bg-bg-raised p-5">
+      <div className="rounded-lg border border-border bg-bg-raised p-4 sm:p-5">
         <div className="flex items-center gap-3">
           {track.artworkUrl && (
             <img
               src={track.artworkUrl}
               alt=""
-              className="h-12 w-12 rounded object-cover"
+              className="h-12 w-12 shrink-0 rounded object-cover"
             />
           )}
-          <div>
-            <p className="font-serif text-base font-semibold text-fg">
+          <div className="min-w-0">
+            <p className="font-serif text-base font-semibold text-fg truncate">
               {track.title}
             </p>
-            <p className="text-sm text-fg-muted">{artist.username}</p>
+            <p className="text-sm text-fg-muted truncate">{artist.username}</p>
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 text-center">
           <Stat label="Plays" value={trackSnapshot.playbackCount} />
           <Stat label="Likes" value={trackSnapshot.likesCount} />
           <Stat label="Reposts" value={trackSnapshot.repostsCount} />
@@ -168,23 +168,23 @@ export function TrackPreview({ url }: Props) {
   if (artistData) {
     const { artist, totals } = artistData;
     return (
-      <div className="rounded-lg border border-border bg-bg-raised p-5">
+      <div className="rounded-lg border border-border bg-bg-raised p-4 sm:p-5">
         <div className="flex items-center gap-3">
           {artist.avatarUrl && (
             <img
               src={artist.avatarUrl}
               alt=""
-              className="h-12 w-12 rounded-full object-cover"
+              className="h-12 w-12 shrink-0 rounded-full object-cover"
             />
           )}
-          <div>
-            <p className="font-serif text-base font-semibold text-fg">
+          <div className="min-w-0">
+            <p className="font-serif text-base font-semibold text-fg truncate">
               {artist.username}
             </p>
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3 text-center">
+        <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-3 text-center">
           <Stat label="Total plays" value={totals.plays} />
           <Stat label="Total likes" value={totals.likes} />
           <Stat label="Reposts" value={totals.reposts} />
@@ -205,8 +205,8 @@ export function TrackPreview({ url }: Props) {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-md bg-bg-elevated px-3 py-2">
-      <p className="text-lg font-semibold text-fg">
+    <div className="rounded-md bg-bg-elevated px-2 sm:px-3 py-2">
+      <p className="text-base sm:text-lg font-semibold text-fg">
         {value.toLocaleString()}
       </p>
       <p className="text-xs text-fg-muted">{label}</p>
