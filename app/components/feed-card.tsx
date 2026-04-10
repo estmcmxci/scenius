@@ -75,7 +75,15 @@ export function FeedCard({ item }: Props) {
             {item.snapshotPlays !== null && (
               <span>
                 {item.snapshotPlays.toLocaleString()} plays at prediction
-                <span className="ml-1 text-gray-400">via SoundCloud</span>
+                <a
+                  href={(item.trackPermalinkUrl ?? item.artistPermalinkUrl) ?? "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-1 text-gray-400 underline hover:text-gray-600"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  via SoundCloud
+                </a>
               </span>
             )}
             <span>rep: {item.reputationScore.toFixed(2)}</span>

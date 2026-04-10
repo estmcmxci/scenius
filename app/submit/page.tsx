@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAccount, useModal, useClient } from "@getpara/react-sdk";
-import { ArtistPreview } from "@/app/components/artist-preview";
+import { TrackPreview } from "@/app/components/track-preview";
 import { formatAddress } from "@/app/shared/format-address";
 
 const HORIZONS = ["1w", "2w", "4w", "8w"] as const;
@@ -136,14 +136,14 @@ export default function SubmitPage() {
         <Field
           label="SoundCloud URL"
           error={fieldErrors.url}
-          hint="Paste a link to the artist's SoundCloud profile"
+          hint="Paste a link to a SoundCloud track"
         >
           <input
             type="url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             onBlur={handleUrlBlur}
-            placeholder="https://soundcloud.com/artist-name"
+            placeholder="https://soundcloud.com/artist-name/track-name"
             className={inputClass(fieldErrors.url)}
             required
           />
@@ -152,7 +152,7 @@ export default function SubmitPage() {
         {/* Artist Preview */}
         {debouncedUrl && (
           <div className="mt-2">
-            <ArtistPreview url={debouncedUrl} />
+            <TrackPreview url={debouncedUrl} />
           </div>
         )}
 
@@ -160,7 +160,7 @@ export default function SubmitPage() {
         <Field
           label="Stream Threshold"
           error={fieldErrors.streamThreshold}
-          hint="Total plays the artist must reach for this prediction to resolve yes"
+          hint="Plays this track must reach within the horizon"
         >
           <input
             type="number"

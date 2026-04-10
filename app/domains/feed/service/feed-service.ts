@@ -45,6 +45,7 @@ export async function getFeedItems(filters?: FeedFilters): Promise<FeedItem[]> {
         reputationScore: row.reputationScore ?? 1.0,
         trackName: row.trackName ?? null,
         trackArtworkUrl: row.trackArtworkUrl ?? null,
+        trackPermalinkUrl: row.trackPermalinkUrl ?? null,
         snapshotPlays,
         snapshotLikes: toNumber(row.snapshotLikes),
         snapshotReposts: toNumber(row.snapshotReposts),

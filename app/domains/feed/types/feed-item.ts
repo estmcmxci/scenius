@@ -30,6 +30,7 @@ export type FeedItem = {
   // track context (null for legacy catalog-only predictions)
   trackName: string | null;
   trackArtworkUrl: string | null;
+  trackPermalinkUrl: string | null;
 
   // snapshot at prediction creation time (track-level if available, else catalog)
   snapshotPlays: number | null;

@@ -30,7 +30,7 @@ export default async function PredictionPage({ params }: Props) {
     notFound();
   }
 
-  const { prediction, artist, snapshot, tastemaker } = detail;
+  const { prediction, artist, snapshot, tastemaker, track, trackSnapshot } = detail;
   const outcome = prediction.outcome ?? "pending";
   const outcomeStyle = OUTCOME_STYLES[outcome] ?? OUTCOME_STYLES.pending;
   const horizonLabel = HORIZON_LABELS[prediction.horizon] ?? prediction.horizon;
@@ -49,19 +49,23 @@ export default async function PredictionPage({ params }: Props) {
       {/* Prediction header */}
       <div className="mt-6 mb-8">
         <div className="flex items-center gap-3 mb-4">
-          {artist.avatarUrl && (
+          {(track?.artworkUrl ?? artist.avatarUrl) && (
             <img
-              src={artist.avatarUrl}
+              src={(track?.artworkUrl ?? artist.avatarUrl)!}
               alt=""
-              className="h-12 w-12 rounded-full object-cover"
+              className={`h-12 w-12 object-cover ${track ? "rounded" : "rounded-full"}`}
             />
           )}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {artist.username}
+              {track ? track.title : artist.username}
             </h1>
-            {artist.city && (
-              <p className="text-sm text-gray-500">{artist.city}</p>
+            {track ? (
+              <p className="text-sm text-gray-500">{artist.username}</p>
+            ) : (
+              artist.city && (
+                <p className="text-sm text-gray-500">{artist.city}</p>
+              )
             )}
           </div>
         </div>
@@ -87,42 +91,65 @@ export default async function PredictionPage({ params }: Props) {
         </span>
       </div>
 
-      {/* Catalog snapshot at prediction time */}
+      {/* Snapshot at prediction time */}
       <section className="mb-8">
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-          Catalog at prediction time
+          {trackSnapshot ? "Track at prediction time" : "Catalog at prediction time"}
         </h2>
-        <div className="grid grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
-          <div>
-            <p className="text-xl font-bold text-gray-900">
-              {Number(snapshot.totalPlays ?? 0).toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500">plays</p>
+        {trackSnapshot ? (
+          <div className="grid grid-cols-3 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(trackSnapshot.playbackCount ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">plays</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(trackSnapshot.likesCount ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">likes</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(trackSnapshot.repostsCount ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">reposts</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900">
-              {Number(snapshot.followersCount ?? 0).toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500">followers</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(snapshot.totalPlays ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">plays</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(snapshot.followersCount ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">followers</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(snapshot.totalLikes ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">likes</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900">
+                {Number(snapshot.totalReposts ?? 0).toLocaleString()}
+              </p>
+              <p className="text-xs text-gray-500">reposts</p>
+            </div>
           </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900">
-              {Number(snapshot.totalLikes ?? 0).toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500">likes</p>
-          </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900">
-              {Number(snapshot.totalReposts ?? 0).toLocaleString()}
-            </p>
-            <p className="text-xs text-gray-500">reposts</p>
-          </div>
-        </div>
+        )}
         <p className="mt-2 text-xs text-gray-400">
           Data via{" "}
-          {artist.permalinkUrl ? (
+          {(track?.permalinkUrl ?? artist.permalinkUrl) ? (
             <a
-              href={artist.permalinkUrl}
+              href={(track?.permalinkUrl ?? artist.permalinkUrl)!}
               target="_blank"
               rel="noopener noreferrer"
               className="underline"
@@ -133,7 +160,7 @@ export default async function PredictionPage({ params }: Props) {
             "SoundCloud"
           )}
           {" · snapshotted "}
-          {snapshot.takenAt.toLocaleDateString()}
+          {(trackSnapshot?.takenAt ?? snapshot.takenAt).toLocaleDateString()}
         </p>
       </section>
 

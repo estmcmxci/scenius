@@ -27,6 +27,7 @@ export type FeedRow = {
   reputationScore: number | null;
   trackName: string | null;
   trackArtworkUrl: string | null;
+  trackPermalinkUrl: string | null;
   trackSnapshotPlays: bigint | null;
   catalogSnapshotPlays: bigint | null;
   snapshotLikes: bigint | null;
@@ -63,6 +64,7 @@ export async function getFeedRows(filters?: FeedFilters): Promise<FeedRow[]> {
       reputationScore: tastemakers.reputationScore,
       trackName: tracks.title,
       trackArtworkUrl: tracks.artworkUrl,
+      trackPermalinkUrl: tracks.permalinkUrl,
       trackSnapshotPlays: trackSnapshots.playbackCount,
       catalogSnapshotPlays: catalogSnapshots.totalPlays,
       snapshotLikes: catalogSnapshots.totalLikes,
