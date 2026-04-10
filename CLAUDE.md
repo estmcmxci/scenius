@@ -104,7 +104,7 @@ Scenius paper. Do not adjust without updating `research/theory.md`.
 |---|---|
 | `feed` | Discovery feed — listing prediction cards, filtering |
 | `predictions` | Prediction lifecycle: creation, snapshot, resolution, EAS |
-| `tastemakers` | User profiles, reputation score, Memory Protocol identity |
+| `tastemakers` | User profiles, reputation score, EAS-attested track record |
 | `soundcloud` | SC API client, snapshot jobs, metric display, attribution |
 | `resolution` | Cron: snapshot delta → outcome → EAS → reputation update |
 
@@ -156,7 +156,7 @@ app/
 | Database | Supabase (Postgres) |
 | Validation | Zod |
 | Auth + Wallet | Para (passkey) |
-| Reputation Graph | Memory Protocol |
+| Reputation Graph | EAS (onchain attestations) |
 | Market Data | SoundCloud API (client credentials) |
 | Attestations | EAS (@ethereum-attestation-service/eas-sdk) |
 | Deployment | Vercel |

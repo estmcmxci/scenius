@@ -51,7 +51,7 @@ CREATE TABLE tastemakers (
   name                 TEXT,
   ens_name             TEXT,
   bio                  TEXT,
-  memory_protocol_id   TEXT,              -- Memory Protocol portable ID
+  memory_protocol_id   TEXT,              -- nullable stub (deprecated, EAS replaces)
   reputation_score     FLOAT DEFAULT 1.0, -- EMA proper scoring rule, init = 1.0
   created_at           TIMESTAMPTZ DEFAULT NOW()
 );

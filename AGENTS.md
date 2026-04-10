@@ -58,7 +58,7 @@ Target: live demo at ETHConf NYC, June 8–10, 2026.
 | Framework | Next.js 15 (App Router) |
 | Styling | Tailwind CSS + CSS variables |
 | Auth + Wallet | Para |
-| Reputation Graph | Memory Protocol |
+| Reputation Graph | EAS (onchain attestations) |
 | Market Data | SoundCloud API (client credentials) |
 | Database | Supabase (Postgres + Drizzle ORM) |
 | Deployment | Vercel |

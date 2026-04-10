@@ -8,7 +8,7 @@ The application is divided into five business domains:
 |---|---|
 | `feed` | Discovery feed — listing of prediction cards, filtering by genre/tag |
 | `predictions` | Prediction lifecycle: creation, snapshot, resolution, EAS attestation |
-| `tastemakers` | User profiles, reputation score, Memory Protocol identity |
+| `tastemakers` | User profiles, reputation score, EAS-attested track record |
 | `soundcloud` | SC API client, snapshot jobs, metric display, attribution |
 | `resolution` | Cron job: snapshot delta → outcome → EAS write → reputation update |
 

@@ -34,5 +34,5 @@ metrics and store a snapshot. No UI yet.
 ## Open
 
 - Para early access — apply or use email auth fallback for M5?
-- Memory Protocol API — stub or live for MVP?
+- ~~Memory Protocol~~ — dropped. EAS attestations handle portable reputation.
 - Stream threshold for seeded artists — 500K placeholder, needs benchmarking
