@@ -26,9 +26,13 @@ export async function feedCommand(outcomeArg?: string): Promise<void> {
     const created = item.createdAt?.toISOString().slice(0, 10) ?? "unknown";
     const plays = item.snapshotPlays !== null ? item.snapshotPlays.toLocaleString() : "—";
 
+    const label = item.trackName
+      ? `"${item.trackName}" by ${item.artistName}`
+      : item.artistName;
+
     console.log(
       [
-        `[${item.outcome.toUpperCase()}] ${item.artistName} — ${item.predictedOutcome.toUpperCase()} ${threshold} streams in ${item.horizon}`,
+        `[${item.outcome.toUpperCase()}] ${label} — ${item.predictedOutcome.toUpperCase()} ${threshold} streams in ${item.horizon}`,
         `  tastemaker: ${item.tastemakerEnsName ?? item.tastemakerName ?? item.tastemakerId} (rep: ${item.reputationScore.toFixed(3)})`,
         `  plays at creation: ${plays}  created: ${created}`,
         `  id: ${item.predictionId}`,

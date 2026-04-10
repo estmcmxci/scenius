@@ -1,17 +1,18 @@
 import { and, eq } from "drizzle-orm";
 import { getEnv } from "@/app/config/env";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
+import { takeTrackSnapshot } from "@/app/domains/soundcloud/service/track-snapshot";
 import { upsertArtist, insertSnapshot } from "@/app/domains/soundcloud/repo/snapshot-repo";
+import { upsertTrack, insertTrackSnapshot } from "@/app/domains/soundcloud/repo/track-repo";
 import { db } from "@/app/db/client";
 import { tastemakers } from "@/app/domains/tastemakers/repo/schema";
 import { predictions } from "@/app/domains/predictions/repo/schema";
 import { posts } from "@/app/domains/feed/repo/schema";
 
-const SEED_ARTISTS = [
-  "https://soundcloud.com/knxwledge",
-  "https://soundcloud.com/thankyouriz",
-  "https://soundcloud.com/quietluke",
-  "https://soundcloud.com/andremlina",
+const SEED_TRACKS = [
+  "https://soundcloud.com/knxwledge/8-alright",
+  "https://soundcloud.com/thankyouriz/hide-the-gun",
+  "https://soundcloud.com/quietluke/dreamless",
 ];
 
 const SEED_TASTEMAKERS = [
@@ -20,15 +21,15 @@ const SEED_TASTEMAKERS = [
 ];
 
 const SEED_PREDICTIONS: Array<{
-  artistIndex: number;
+  trackIndex: number;
   tastemakerIndex: number;
   streamThreshold: number;
   predictedOutcome: "yes" | "no";
   horizon: "1w" | "2w" | "4w" | "8w";
 }> = [
-  { artistIndex: 0, tastemakerIndex: 0, streamThreshold: 500000, predictedOutcome: "yes", horizon: "4w" },
-  { artistIndex: 1, tastemakerIndex: 1, streamThreshold: 100000, predictedOutcome: "yes", horizon: "8w" },
-  { artistIndex: 2, tastemakerIndex: 0, streamThreshold: 50000, predictedOutcome: "no", horizon: "2w" },
+  { trackIndex: 0, tastemakerIndex: 0, streamThreshold: 50000, predictedOutcome: "yes", horizon: "4w" },
+  { trackIndex: 1, tastemakerIndex: 1, streamThreshold: 10000, predictedOutcome: "yes", horizon: "8w" },
+  { trackIndex: 2, tastemakerIndex: 0, streamThreshold: 5000, predictedOutcome: "no", horizon: "2w" },
 ];
 
 async function upsertTastemaker(data: { displayName: string; walletAddress: string }): Promise<string> {
@@ -56,25 +57,44 @@ async function upsertTastemaker(data: { displayName: string; walletAddress: stri
 export async function seedCommand(): Promise<void> {
   const env = getEnv();
 
-  // 1. Snapshot artists
-  console.log("Snapshotting artists...");
+  // 1. Snapshot tracks and their artists
+  console.log("Snapshotting tracks...");
   const artistIds: string[] = [];
   const snapshotIds: string[] = [];
+  const trackIds: string[] = [];
+  const trackSnapshotIds: string[] = [];
 
-  for (const url of SEED_ARTISTS) {
+  for (const url of SEED_TRACKS) {
     console.log(`  ${url}`);
-    const result = await takeSnapshot(url, env.SOUNDCLOUD_CLIENT_ID, env.SOUNDCLOUD_CLIENT_SECRET);
-    if (result.totals.tracksFetched === 0) {
-      console.log(`    ${result.artist.username} → skipped (0 tracks returned)`);
+    const trackResult = await takeTrackSnapshot(url, env.SOUNDCLOUD_CLIENT_ID, env.SOUNDCLOUD_CLIENT_SECRET);
+
+    const artistId = await upsertArtist(trackResult);
+    const trackId = await upsertTrack(trackResult, artistId);
+    const trackSnapshotId = await insertTrackSnapshot(trackId, trackResult);
+
+    // Also take catalog snapshot for the required snapshotId column
+    const catalogResult = await takeSnapshot(
+      trackResult.artist.permalinkUrl,
+      env.SOUNDCLOUD_CLIENT_ID,
+      env.SOUNDCLOUD_CLIENT_SECRET
+    );
+
+    if (catalogResult.totals.tracksFetched === 0) {
+      console.log(`    ${trackResult.artist.username} → skipped (0 tracks returned)`);
       artistIds.push("");
       snapshotIds.push("");
+      trackIds.push("");
+      trackSnapshotIds.push("");
       continue;
     }
-    const artistId = await upsertArtist(result);
-    const snapshotId = await insertSnapshot(artistId, result);
+
+    const snapshotId = await insertSnapshot(artistId, catalogResult);
+
     artistIds.push(artistId);
     snapshotIds.push(snapshotId);
-    console.log(`    ${result.artist.username} → ${result.totals.plays.toLocaleString()} plays`);
+    trackIds.push(trackId);
+    trackSnapshotIds.push(trackSnapshotId);
+    console.log(`    "${trackResult.track.title}" by ${trackResult.artist.username} → ${trackResult.snapshot.playbackCount.toLocaleString()} plays`);
   }
 
   // 2. Create tastemakers
@@ -90,7 +110,7 @@ export async function seedCommand(): Promise<void> {
   console.log("Creating predictions...");
   const predictionIds: string[] = [];
   for (const p of SEED_PREDICTIONS) {
-    const artistId = artistIds[p.artistIndex];
+    const artistId = artistIds[p.trackIndex];
     const tastemakerId = tastemakerIds[p.tastemakerIndex];
 
     if (!artistId || !tastemakerId) {
@@ -98,17 +118,21 @@ export async function seedCommand(): Promise<void> {
       continue;
     }
 
+    const trackId = trackIds[p.trackIndex];
+    const whereConditions = [
+      eq(predictions.tastemakerId, tastemakerId),
+      eq(predictions.artistId, artistId),
+      eq(predictions.streamThreshold, BigInt(p.streamThreshold)),
+      eq(predictions.horizon, p.horizon),
+    ];
+    if (trackId) {
+      whereConditions.push(eq(predictions.trackId, trackId));
+    }
+
     const existing = await db
       .select({ id: predictions.id })
       .from(predictions)
-      .where(
-        and(
-          eq(predictions.tastemakerId, tastemakerId),
-          eq(predictions.artistId, artistId),
-          eq(predictions.streamThreshold, BigInt(p.streamThreshold)),
-          eq(predictions.horizon, p.horizon),
-        )
-      )
+      .where(and(...whereConditions))
       .limit(1);
 
     if (existing.length > 0) {
@@ -122,7 +146,9 @@ export async function seedCommand(): Promise<void> {
       .values({
         tastemakerId,
         artistId,
-        snapshotId: snapshotIds[p.artistIndex],
+        snapshotId: snapshotIds[p.trackIndex],
+        trackId: trackIds[p.trackIndex],
+        trackSnapshotId: trackSnapshotIds[p.trackIndex],
         streamThreshold: BigInt(p.streamThreshold),
         predictedOutcome: p.predictedOutcome,
         horizon: p.horizon,
@@ -147,8 +173,8 @@ export async function seedCommand(): Promise<void> {
       await db.insert(posts).values({
         predictionId: predictionIds[0],
         tastemakerId: tastemakerIds[0],
-        title: "Knxwledge is about to have a moment",
-        body: "The production catalog is deep and the streaming numbers are climbing. Calling 500K in 4 weeks.",
+        title: "Knxwledge — 8 Alright is about to break out",
+        body: "This track has deep replay value and the play count is climbing. Calling 50K in 4 weeks.",
         published: true,
       });
     } else {
@@ -157,7 +183,8 @@ export async function seedCommand(): Promise<void> {
   }
 
   console.log("\nSeed complete:");
-  console.log(`  ${artistIds.length} artists`);
+  console.log(`  ${trackIds.filter(Boolean).length} tracks`);
+  console.log(`  ${artistIds.filter(Boolean).length} artists`);
   console.log(`  ${tastemakerIds.length} tastemakers`);
   console.log(`  ${predictionIds.length} predictions`);
   console.log(`  1 post`);
