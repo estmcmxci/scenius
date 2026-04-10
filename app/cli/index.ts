@@ -10,6 +10,11 @@ async function main() {
       await seedCommand();
       break;
     }
+    case "seed-demo": {
+      const { seedDemoCommand } = await import("./seed-demo");
+      await seedDemoCommand();
+      break;
+    }
     case "prediction": {
       const { predictionCommand } = await import("./prediction");
       await predictionCommand(args[0]);
@@ -76,7 +81,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: attest-test, feed, predict, prediction, preview, reputation-test, resolve, seed, snapshot, snapshot-all, tastemaker");
+      console.error("Available commands: attest-test, feed, predict, prediction, preview, reputation-test, resolve, seed, seed-demo, snapshot, snapshot-all, tastemaker");
       process.exit(1);
   }
 }
