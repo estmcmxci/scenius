@@ -1,7 +1,12 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/app/db/client";
 import { predictions } from "./schema";
-import { artists, catalogSnapshots } from "@/app/domains/soundcloud/repo/schema";
+import {
+  artists,
+  catalogSnapshots,
+  tracks,
+  trackSnapshots,
+} from "@/app/domains/soundcloud/repo/schema";
 import { tastemakers } from "@/app/domains/tastemakers/repo/schema";
 
 export type PredictionDetail = {
@@ -9,6 +14,8 @@ export type PredictionDetail = {
   artist: typeof artists.$inferSelect;
   snapshot: typeof catalogSnapshots.$inferSelect;
   tastemaker: typeof tastemakers.$inferSelect;
+  track: typeof tracks.$inferSelect | null;
+  trackSnapshot: typeof trackSnapshots.$inferSelect | null;
 };
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -22,15 +29,25 @@ export async function getPredictionById(id: string): Promise<PredictionDetail | 
       artist: artists,
       snapshot: catalogSnapshots,
       tastemaker: tastemakers,
+      track: tracks,
+      trackSnapshot: trackSnapshots,
     })
     .from(predictions)
     .innerJoin(artists, eq(predictions.artistId, artists.id))
     .innerJoin(catalogSnapshots, eq(predictions.snapshotId, catalogSnapshots.id))
     .innerJoin(tastemakers, eq(predictions.tastemakerId, tastemakers.id))
+    .leftJoin(tracks, eq(predictions.trackId, tracks.id))
+    .leftJoin(trackSnapshots, eq(predictions.trackSnapshotId, trackSnapshots.id))
     .where(eq(predictions.id, id))
     .limit(1);
 
-  return rows[0] ?? null;
+  if (!rows[0]) return null;
+
+  return {
+    ...rows[0],
+    track: rows[0].track ?? null,
+    trackSnapshot: rows[0].trackSnapshot ?? null,
+  };
 }
 
 export async function createPrediction(params: {

@@ -19,7 +19,7 @@ type Props = {
 };
 
 export function PredictionCard({ item }: Props) {
-  const { prediction, artist } = item;
+  const { prediction, artist, track } = item;
   const outcome = prediction.outcome ?? "pending";
   const outcomeStyle = OUTCOME_STYLES[outcome] ?? OUTCOME_STYLES.pending;
   const horizonLabel =
@@ -33,7 +33,7 @@ export function PredictionCard({ item }: Props) {
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-medium text-gray-900 truncate">
-            {artist.username}
+            {track ? `${track.title} by ${artist.username}` : artist.username}
           </p>
           <p className="mt-1 text-sm text-gray-600">
             Predicts{" "}
