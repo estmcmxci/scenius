@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthButton } from "@/app/components/auth-button";
 
 export function Nav() {
   return (
@@ -17,10 +18,11 @@ export function Nav() {
           </Link>
           <Link
             href="/submit"
-            className="rounded-md bg-gray-900 px-3.5 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800"
+            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             Submit Prediction
           </Link>
+          <AuthButton />
         </div>
       </div>
     </nav>
