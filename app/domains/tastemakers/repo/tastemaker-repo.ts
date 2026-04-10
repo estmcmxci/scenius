@@ -32,10 +32,12 @@ export async function getTastemakerById(
 export async function findOrCreateByWallet(
   walletAddress: string
 ): Promise<TastemakerRow> {
+  const normalized = walletAddress.toLowerCase();
+
   const existing = await db
     .select()
     .from(tastemakers)
-    .where(eq(tastemakers.walletAddress, walletAddress))
+    .where(eq(tastemakers.walletAddress, normalized))
     .limit(1);
 
   if (existing[0]) return existing[0];
@@ -43,7 +45,7 @@ export async function findOrCreateByWallet(
   const [created] = await db
     .insert(tastemakers)
     .values({
-      walletAddress,
+      walletAddress: normalized,
       reputationScore: 1.0,
       totalPredictions: 0,
     })

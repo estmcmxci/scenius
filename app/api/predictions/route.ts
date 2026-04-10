@@ -16,7 +16,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const data = parsed.data;
 
-  // Resolve tastemakerId from wallet address if not provided directly
+  // TODO: Verify wallet ownership via Para server SDK session token
+  // Currently trusts walletAddress from client — acceptable for MVP but
+  // must be replaced with server-side session verification before launch.
   let tastemakerId = data.tastemakerId;
   if (!tastemakerId && data.walletAddress) {
     const tastemaker = await findOrCreateByWallet(data.walletAddress);
