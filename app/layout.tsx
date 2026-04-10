@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Nav } from "@/app/components/nav";
+import { ParaProvider } from "@/app/providers/para-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -15,8 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Nav />
-        {children}
+        <ParaProvider>
+          <Nav />
+          {children}
+        </ParaProvider>
       </body>
     </html>
   );

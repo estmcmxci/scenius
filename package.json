@@ -19,6 +19,9 @@
   "packageManager": "pnpm@10.17.1",
   "dependencies": {
     "@ethereum-attestation-service/eas-sdk": "^2.9.0",
+    "@getpara/react-sdk": "^2.22.0",
+    "@getpara/web-sdk": "^2.22.0",
+    "@tanstack/react-query": "^5.97.0",
     "drizzle-orm": "^0.45.1",
     "ethers": "^6.16.0",
     "next": "^16.1.6",

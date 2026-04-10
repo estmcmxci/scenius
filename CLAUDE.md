@@ -155,7 +155,7 @@ app/
 | ORM | Drizzle |
 | Database | Supabase (Postgres) |
 | Validation | Zod |
-| Auth + Wallet | Para (passkey) |
+| Auth + Wallet | Para (passkey) — see Para section below |
 | Reputation Graph | EAS (onchain attestations) |
 | Market Data | SoundCloud API (client credentials) |
 | Attestations | EAS (@ethereum-attestation-service/eas-sdk) |
@@ -181,6 +181,36 @@ app/
 - **GitHub** repo: `estmcmxci/scenius`. PRs link to Linear issues.
 - Every PR describes what changed and why, and links the Linear issue.
 - Small changes: PR directly. Features/milestones: plan in `plans/` first.
+
+---
+
+## Para (Auth + Wallet)
+
+Para provides passkey-based embedded wallets. No seed phrases, no MetaMask.
+Docs: https://docs.getpara.com | Skill: https://docs.getpara.com/skill.md
+
+**CLI setup:**
+```bash
+npm install -g @getpara/cli
+para login
+para whoami
+para doctor   # validates integration setup
+```
+
+**SDK packages:**
+- `@getpara/react-sdk` — React hooks + ParaModal component
+- `@getpara/web-sdk` — framework-agnostic base
+- `@getpara/ethers-v6-integration` — ethers.js v6 signer
+- `@tanstack/react-query` — required peer dependency
+
+**Integration requirements:**
+- `ParaProvider` must wrap the app (in `app/providers/para-provider.tsx`)
+- `QueryClientProvider` from `@tanstack/react-query` must wrap `ParaProvider`
+- CSS import: `@getpara/react-sdk/styles.css`
+- `'use client'` directive on files using Para hooks
+- Env var: `NEXT_PUBLIC_PARA_API_KEY` (client-side, prefixed)
+
+**Config:** `app/config/para.ts` exports the Para client instance.
 
 ---
 
