@@ -1,9 +1,19 @@
 #!/bin/bash
-# Local cron script for resolving predictions
-# Scheduled: April 17, 2026 at 15:00 EDT (19:00 UTC)
-# Fires ~89 min after the demo batch (createdAt 2026-04-10T17:31:47Z, horizon 1w) is due.
-# Output: /tmp/scenius-resolve.log
+# DEPRECATED — superseded by Vercel Cron (see vercel.json).
+#
+# Kept as a manual-rerun helper. If you need to kick resolution without
+# hitting the Vercel route, source nvm first so pnpm is on PATH:
+#
+#   source "$HOME/.nvm/nvm.sh" && cd /Users/oakgroup/scenius && pnpm cli resolve
+#
+# The Apr 17 2026 crontab entry that used this script was removed after
+# Vercel Cron took over.
 
+set -euo pipefail
 cd /Users/oakgroup/scenius
-export PATH="/opt/homebrew/bin:$PATH"
-pnpm cli resolve >> /tmp/scenius-resolve.log 2>&1
+
+# nvm-aware PATH (the old `/opt/homebrew/bin` path didn't include pnpm
+# on this Mac — that failure is what motivated the move to Vercel Cron)
+export PATH="$HOME/.nvm/versions/node/v24.1.0/bin:/opt/homebrew/bin:$PATH"
+
+pnpm cli resolve "$@" >> /tmp/scenius-resolve.log 2>&1
