@@ -17,6 +17,8 @@
   --color-outcome-yes-fg: #4ade80;
   --color-outcome-no-bg: #2e0a0a;
   --color-outcome-no-fg: #f87171;
+  --color-outcome-void-bg: #1f1f1f;
+  --color-outcome-void-fg: #a3a3a3;
   --color-error-bg: #2e0a0a;
   --color-error-border: #7f1d1d;
   --color-error-fg: #fca5a5;

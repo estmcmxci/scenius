@@ -3,6 +3,14 @@ import { ScTrackSchema, type ScTrack } from "../types/sc-track";
 
 const TOKEN_TTL_MS = 3500 * 1000;
 
+export class ScNotFoundError extends Error {
+  readonly code = "sc_not_found" as const;
+  constructor(path: string, body: string) {
+    super(`SC API ${path} returned 404: ${body}`);
+    this.name = "ScNotFoundError";
+  }
+}
+
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
 async function getToken(clientId: string, clientSecret: string): Promise<string> {
@@ -47,7 +55,11 @@ async function scFetch(
   });
 
   if (!res.ok) {
-    throw new Error(`SC API ${path} failed: ${res.status} ${await res.text()}`);
+    const body = await res.text();
+    if (res.status === 404) {
+      throw new ScNotFoundError(path, body);
+    }
+    throw new Error(`SC API ${path} failed: ${res.status} ${body}`);
   }
 
   return res.json();

@@ -10,6 +10,7 @@ import {
 } from "@/app/domains/resolution/service/eas-service";
 import { takeSnapshot } from "@/app/domains/soundcloud/service/snapshot";
 import { takeTrackSnapshot } from "@/app/domains/soundcloud/service/track-snapshot";
+import { ScNotFoundError } from "@/app/domains/soundcloud/service/sc-client";
 import { upsertArtist, insertSnapshot } from "@/app/domains/soundcloud/repo/snapshot-repo";
 import { upsertTrack, insertTrackSnapshot } from "@/app/domains/soundcloud/repo/track-repo";
 import { catalogSnapshots, trackSnapshots } from "@/app/domains/soundcloud/repo/schema";
@@ -20,6 +21,7 @@ type BinaryOutcome = "yes" | "no";
 
 interface ResolutionResult {
   resolved: number;
+  voided: number;
   skipped: number;
   errors: number;
   details: ResolutionDetail[];
@@ -226,7 +228,7 @@ export async function runWeeklyResolution(now: Date, opts?: { force?: boolean })
     duePredictionCount: duePredictions.length,
   }));
 
-  const result: ResolutionResult = { resolved: 0, skipped: 0, errors: 0, details: [] };
+  const result: ResolutionResult = { resolved: 0, voided: 0, skipped: 0, errors: 0, details: [] };
 
   if (duePredictions.length === 0) {
     return result;
@@ -250,6 +252,18 @@ export async function runWeeklyResolution(now: Date, opts?: { force?: boolean })
         newReputation: detail.newReputation,
       }));
     } catch (err) {
+      if (err instanceof ScNotFoundError) {
+        await voidPrediction(pred.id, "sc_not_found");
+        result.voided++;
+        console.warn(JSON.stringify({
+          event: "cron.resolve.voided",
+          predictionId: pred.id,
+          reason: "sc_not_found",
+          detail: err.message,
+        }));
+        continue;
+      }
+
       result.errors++;
       const message = err instanceof Error ? err.message : String(err);
       console.error(JSON.stringify({
@@ -263,11 +277,23 @@ export async function runWeeklyResolution(now: Date, opts?: { force?: boolean })
   console.info(JSON.stringify({
     event: "cron.resolve.complete",
     resolved: result.resolved,
+    voided: result.voided,
     skipped: result.skipped,
     errors: result.errors,
   }));
 
   return result;
+}
+
+async function voidPrediction(predictionId: string, reason: string): Promise<void> {
+  await db
+    .update(predictions)
+    .set({
+      outcome: "void",
+      voidReason: reason,
+      resolvedAt: new Date(),
+    })
+    .where(and(eq(predictions.id, predictionId), eq(predictions.outcome, "pending")));
 }
 
 export async function runWeeklyResolutionDryRun(now: Date): Promise<DuePrediction[]> {

@@ -12,8 +12,9 @@ function readDatabaseUrlFromFile(fileName: string): string | undefined {
 
   const envFile = readFileSync(filePath, "utf8");
   const match = envFile.match(/^DATABASE_URL=(.+)$/m);
-
-  return match?.[1]?.trim();
+  const raw = match?.[1]?.trim();
+  // Strip surrounding single or double quotes if present
+  return raw?.replace(/^["'](.*)["']$/, "$1");
 }
 
 // Prefer workspace-local overrides so Drizzle can use the Supabase pooler
