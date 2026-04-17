@@ -1,5 +1,11 @@
 # Plan: Scaffold Scenius Documentation Site (Vocs)
 
+> **Status (2026-04-17): inactive.** This Vocs site was scaffolded in Feb 2025
+> but was superseded by the in-repo markdown docs (`CLAUDE.md`,
+> `ARCHITECTURE.md`, `spec/`, `plans/`, `demo/`) + the top-level `README.md`.
+> The project is kept on disk for potential revival post-ETHConf if a
+> standalone developer docs site becomes valuable. Not currently deployed.
+
 ## Context
 
 Pascal from ETHGlobal needs to see a working product by ETH Conf NYC (June 8). A polished docs site serves two purposes: (1) makes the project look legit for the Spotlight application, and (2) gives the hackathon MVP a home for its mechanism explanation, research, and API reference. Scenius already has ~150 KB of written content across 13 markdown files, 3 figure PDFs, a compiled paper, and simulation results. The docs site is mostly a reformatting + restructuring job, not a writing-from-scratch job.
