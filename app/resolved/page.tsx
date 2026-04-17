@@ -1,6 +1,8 @@
 import { getFeedItems } from "@/app/domains/feed/service/feed-service";
 import { FeedCard } from "@/app/components/feed-card";
 
+export const dynamic = "force-dynamic";
+
 export default async function ResolvedPage() {
   const items = await getFeedItems({ outcome: "resolved" });
 

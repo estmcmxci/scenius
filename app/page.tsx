@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getFeedItems } from "@/app/domains/feed/service/feed-service";
 import { FeedCard } from "@/app/components/feed-card";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Scenius — Reputation-weighted predictions on independent music",
   description:
