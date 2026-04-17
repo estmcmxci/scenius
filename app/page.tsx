@@ -27,8 +27,11 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const items = await getFeedItems({ outcome: "all" });
-  const resolvedCount = items.filter(
-    (i) => i.outcome === "yes" || i.outcome === "no"
+  // "Attested" must reflect actual onchain state. Filtering on outcome alone
+  // over-reports when a resolution succeeded but the EAS write transiently
+  // failed (see the retryUnattested flow in the resolution service).
+  const attestedCount = items.filter(
+    (i) => i.easAttestationUid !== null
   ).length;
   const pendingCount = items.filter((i) => i.outcome === "pending").length;
 
@@ -44,7 +47,7 @@ export default async function Home() {
       </header>
 
       <LandingDateline
-        resolvedCount={resolvedCount}
+        attestedCount={attestedCount}
         pendingCount={pendingCount}
       />
       <LandingHero />
