@@ -59,3 +59,18 @@ tsconfig.tsbuildinfo
 
 # Claude / MCP
 .claude/settings.local.json
+.claude/skills/
+.claude/worktrees/
+.agents/
+
+# Codex
+.codex/
+
+# Claude Code skill plugins (installed per-dev, not per-project)
+/skills/
+/skills-lock.json
+
+# Dev artifacts (screenshots, tool output caches)
+/favicon-gallery*.png
+/landing-*.png
+/graphify-out/
