@@ -31,6 +31,7 @@ export const predictions = pgTable(
       () => trackSnapshots.id
     ),
     easAttestationUid: text("eas_attestation_uid"),
+    voidReason: text("void_reason"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   },
@@ -39,6 +40,6 @@ export const predictions = pgTable(
     index("idx_predictions_outcome").on(table.outcome),
     check("chk_predicted_outcome", sql`${table.predictedOutcome} in ('yes', 'no')`),
     check("chk_horizon", sql`${table.horizon} in ('1w', '2w', '4w', '8w')`),
-    check("chk_outcome", sql`${table.outcome} in ('pending', 'yes', 'no')`),
+    check("chk_outcome", sql`${table.outcome} in ('pending', 'yes', 'no', 'void')`),
   ]
 );

@@ -7,6 +7,14 @@ const OUTCOME_STYLES: Record<string, string> = {
   pending: "bg-outcome-pending-bg text-outcome-pending-fg",
   yes: "bg-outcome-yes-bg text-outcome-yes-fg",
   no: "bg-outcome-no-bg text-outcome-no-fg",
+  void: "bg-outcome-void-bg text-outcome-void-fg",
+};
+
+const OUTCOME_LABELS: Record<string, string> = {
+  pending: "pending",
+  yes: "yes",
+  no: "no",
+  void: "unavailable",
 };
 
 const HORIZON_LABELS: Record<string, string> = {
@@ -94,7 +102,7 @@ export function FeedCard({ item }: Props) {
         <span
           className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${outcomeStyle}`}
         >
-          {outcome}
+          {OUTCOME_LABELS[outcome] ?? outcome}
         </span>
       </div>
     </Link>

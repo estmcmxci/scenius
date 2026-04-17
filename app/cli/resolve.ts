@@ -42,6 +42,7 @@ export async function resolveCommand() {
   const result = await runWeeklyResolution(new Date(), { force: isForce });
 
   console.log(`Resolved: ${result.resolved}`);
+  console.log(`Voided:   ${result.voided}`);
   console.log(`Errors:   ${result.errors}`);
 
   for (const detail of result.details) {
