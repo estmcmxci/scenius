@@ -25,6 +25,16 @@ async function main() {
       await resolveCommand();
       break;
     }
+    case "pending-inspect": {
+      const { pendingInspectCommand } = await import("./pending-inspect");
+      await pendingInspectCommand();
+      break;
+    }
+    case "prune-pending": {
+      const { prunePendingCommand } = await import("./prune-pending");
+      await prunePendingCommand();
+      break;
+    }
     case "tastemaker": {
       const { tastemakerCommand } = await import("./tastemaker");
       await tastemakerCommand(args[0]);
@@ -81,7 +91,7 @@ async function main() {
     }
     default:
       console.error(`Unknown command: ${command}`);
-      console.error("Available commands: attest-test, feed, predict, prediction, preview, reputation-test, resolve, seed, seed-demo, snapshot, snapshot-all, tastemaker");
+      console.error("Available commands: attest-test, feed, pending-inspect, predict, prediction, preview, prune-pending, reputation-test, resolve, seed, seed-demo, snapshot, snapshot-all, tastemaker");
       process.exit(1);
   }
 }
