@@ -23,8 +23,12 @@ function computeStats(
   predictions: PredictionWithArtist[]
 ): TastemakerStats {
   const totalPredictions = predictions.length;
+  // Only YES/NO outcomes count as resolved. Void predictions (tracks
+  // deleted from SoundCloud mid-horizon) are excluded — they're a data
+  // problem, not a skill signal, and should not move win rate either
+  // direction.
   const resolved = predictions.filter(
-    (p) => p.prediction.outcome !== "pending"
+    (p) => p.prediction.outcome === "yes" || p.prediction.outcome === "no"
   );
   const resolvedPredictions = resolved.length;
   const correctPredictions = resolved.filter(
