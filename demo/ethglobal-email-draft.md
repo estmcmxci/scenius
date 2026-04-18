@@ -1,4 +1,4 @@
-# ETHGlobal outreach email — draft v0.1
+# ETHGlobal outreach email — draft v0.2
 
 **Context:** short email to a known contact at ETHGlobal to share the
 current Scenius MVP and float a demo-slot ask for ETHConf NYC
@@ -26,7 +26,7 @@ Live: https://scenius.blog
 Repo: https://github.com/estmcmxci/scenius
 Paper (mechanism formalization): https://github.com/estmcmxci/scenius-paper
 
-Would love to get Scenius on stage at ETHConf — a 3-minute walkthrough of the full loop with the attestation reveal lands cleanly. Happy to send the demo script if useful. What do next steps look like from your end?
+Would love to get Scenius on stage at ETHConf — a 3-minute walkthrough of the full loop with the attestation reveal lands cleanly. Happy to send the demo script if useful. If easier, grab 15 on my calendar: https://calendly.com/oakgroup-worldwide/building-together
 
 Thanks,
 [Your name]
@@ -40,7 +40,7 @@ Thanks,
 - **Proof** is one concrete sentence with a raw easscan URL.
 - **Three links** in a block (Live / Repo / Paper) for clean hierarchy.
 - **Paper** framed as "mechanism formalization" — substance, not academic flex.
-- **Ask** is soft: "what do next steps look like from your end?" — open to demo slot, call, or pointer to application process.
+- **Ask** offers two paths: the soft-ask framing stays open for "pointer to application process," and the Calendly link (`oakgroup-worldwide/building-together`) lets them self-book a call if that's easier. Pronunciation of *Scenius* (like *genius*) handled in conversation, not email.
 
 ## Tweaks to apply before sending
 
@@ -48,11 +48,6 @@ Thanks,
 - If the paper repo isn't ready for public eyes, drop that third link — README already references it.
 - For a tighter (~120 word) variant, cut the Paper link and the "demo script" line.
 
-## v0.2 open questions
-
-- Should we include the pronunciation note inline (*scenius*, like *genius*) or handle it in conversation?
-- Do we want to pre-load a calendar link (Calendly / Cal.com) for the "What do next steps look like" line to convert the soft ask into a direct booking?
-
 ---
 
-*v0.1 drafted 2026-04-18. Revise to v0.2 after first response (if any).*
+*v0.2 drafted 2026-04-18. Calendly link added, pronunciation moved to conversation. Revise to v0.3 after first response.*
